@@ -1,0 +1,3149 @@
+<!doctype html>
+<html lang="es" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parque Nacional El Cusuco - Dashboard</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+
+    .page-transition {
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .nav-item {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      transform: translateX(8px);
+    }
+
+    .nav-item.active {
+      border-left: 4px solid;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .card-hover {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-card {
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: scale(1.05);
+    }
+
+    .sidebar {
+      position: fixed;
+      left: -300px;
+      top: 0;
+      bottom: 0;
+      width: 280px;
+      overflow-y: auto;
+      z-index: 1000;
+      transition: left 0.3s ease-in-out;
+    }
+
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .sidebar-overlay.show {
+      display: block;
+      opacity: 1;
+    }
+
+    .main-content {
+      margin-left: 0;
+      min-height: 100%;
+      width: 100%;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #059669 0%, #10b981 50%, #34d399 100%);
+      padding: 4rem 2rem;
+      text-align: center;
+      color: white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 15s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .menu-button {
+      position: fixed;
+      top: 1.5rem;
+      left: 1.5rem;
+      z-index: 1001;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 28px;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .menu-button:hover {
+      transform: scale(1.15) rotate(90deg);
+    }
+
+    .home-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2.5rem;
+      padding: 3rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .home-card {
+      padding: 3rem 2rem;
+      border-radius: 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .home-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .home-card:hover::before {
+      opacity: 1;
+    }
+
+    .home-card:hover {
+      transform: translateY(-15px) scale(1.03);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+
+    .home-card-icon {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+      transition: all 0.3s ease;
+    }
+
+    .home-card:hover .home-card-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .home-card-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .home-card-description {
+      font-size: 1.1rem;
+      opacity: 0.85;
+      position: relative;
+      z-index: 1;
+    }
+
+    .back-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      font-size: 1.1rem;
+    }
+
+    .back-button:hover {
+      transform: translateX(-8px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .content-card {
+      background: white;
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .content-card:hover {
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border-radius: 20px;
+      padding: 2rem;
+      border-left: 6px solid #10b981;
+      transition: all 0.3s ease;
+    }
+
+    .feature-box:hover {
+      transform: translateX(10px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+    }
+
+    .stat-number {
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 3rem;
+      padding-bottom: 2rem;
+      border-left: 4px solid #10b981;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -12px;
+      top: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 0 6px #dcfce7;
+    }
+
+    .activity-card {
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-top: 5px solid #10b981;
+      transition: all 0.3s ease;
+    }
+
+    .activity-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .map-container {
+      background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 50%, #34d399 100%);
+      border-radius: 24px;
+      padding: 3rem;
+      min-height: 600px;
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-marker {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .map-marker:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      z-index: 10;
+    }
+
+    .marker-label {
+      background: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      font-weight: 700;
+      transition: all 0.3s ease;
+    }
+
+    .map-marker:hover .marker-label {
+      background: #10b981;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .progress-ring {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .home-grid {
+        grid-template-columns: 1fr;
+        padding: 2rem 1rem;
+      }
+
+      .hero-banner {
+        padding: 3rem 1.5rem;
+      }
+
+      .home-card {
+        min-height: 240px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#f0fdf4",
+      surface_color: "#ffffff",
+      text_color: "#064e3b",
+      primary_action: "#10b981",
+      secondary_action: "#059669",
+      font_family: "Inter",
+      font_size: 16,
+      main_title: "Parque Nacional El Cusuco",
+      subtitle: "Sistema de Gestión Turística y Conservación",
+      nav_historia: "Historia",
+      nav_actividades: "Actividades Turísticas",
+      nav_mapa: "Mapa Interactivo",
+      nav_observaciones: "Observaciones",
+      nav_perfil: "Perfil de Turistas",
+      nav_campana: "Campaña de Conservación",
+      nav_informe: "Informe",
+      nav_galeria: "Galería Multimedia"
+    };
+
+    let config = {};
+    let currentPage = 'home';
+    let sidebarOpen = false;
+
+    const pages = {
+      home: {
+        icon: '🏠',
+        title: 'Panel Principal',
+        isHome: true
+      },
+      historia: { icon: '📜', title: 'Historia', description: 'Origen y evolución del parque' },
+      actividades: { icon: '🥾', title: 'Actividades', description: 'Explora senderos únicos' },
+      mapa: { icon: '🗺️', title: 'Mapa', description: 'Ubicaciones interactivas' },
+      observaciones: { icon: '🔍', title: 'Observaciones', description: 'Espacio para tus datos' },
+      perfil: { icon: '👥', title: 'Perfil Turistas', description: 'Análisis demográfico' },
+      campana: { icon: '🌳', title: 'Conservación', description: 'Iniciativas ambientales' },
+      informe: { icon: '📊', title: 'Informe', description: 'Resultados anuales' },
+      galeria: { icon: '📸', title: 'Galería', description: 'Imágenes del parque' }
+    };
+
+    function renderHomePage() {
+      const mainTitle = config.main_title || defaultConfig.main_title;
+      const subtitle = config.subtitle || defaultConfig.subtitle;
+      
+      return `
+        <div class="hero-banner">
+          <div style="position: relative; z-index: 1;">
+            <div class="text-7xl mb-6">    </div>
+            <h1 class="text-5xl font-black mb-4" style="text-shadow: 0 2px 10px rgba(0,0,0,0.2)">${mainTitle}</h1>
+            <p class="text-2xl font-medium opacity-95">${subtitle}</p>
+          </div>
+        </div>
+
+        <div class="home-grid page-transition">
+          <div class="home-card" onclick="navigateTo('historia')" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+            <div class="home-card-icon">📜</div>
+            <div class="home-card-title" style="color: #78350f;">${config.nav_historia || defaultConfig.nav_historia}</div>
+            <p class="home-card-description" style="color: #92400e;">${pages.historia.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('actividades')" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+            <div class="home-card-icon">🥾</div>
+            <div class="home-card-title" style="color: #1e3a8a;">${config.nav_actividades || defaultConfig.nav_actividades}</div>
+            <p class="home-card-description" style="color: #1e40af;">${pages.actividades.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('mapa')" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);">
+            <div class="home-card-icon">🗺️</div>
+            <div class="home-card-title" style="color: #14532d;">${config.nav_mapa || defaultConfig.nav_mapa}</div>
+            <p class="home-card-description" style="color: #166534;">${pages.mapa.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('observaciones')" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+            <div class="home-card-icon">🔍</div>
+            <div class="home-card-title" style="color: #831843;">${config.nav_observaciones || defaultConfig.nav_observaciones}</div>
+            <p class="home-card-description" style="color: #9f1239;">${pages.observaciones.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('perfil')" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+            <div class="home-card-icon">👥</div>
+            <div class="home-card-title" style="color: #312e81;">${config.nav_perfil || defaultConfig.nav_perfil}</div>
+            <p class="home-card-description" style="color: #3730a3;">${pages.perfil.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('campana')" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+            <div class="home-card-icon">🌳</div>
+            <div class="home-card-title" style="color: #064e3b;">${config.nav_campana || defaultConfig.nav_campana}</div>
+            <p class="home-card-description" style="color: #065f46;">${pages.campana.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('informe')" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);">
+            <div class="home-card-icon">📊</div>
+            <div class="home-card-title" style="color: #7c2d12;">${config.nav_informe || defaultConfig.nav_informe}</div>
+            <p class="home-card-description" style="color: #92400e;">${pages.informe.description}</p>
+          </div>
+
+          <div class="home-card" onclick="navigateTo('galeria')" style="background: linear-gradient(135deg, #fae8ff 0%, #f5d0fe 100%);">
+            <div class="home-card-icon">📸</div>
+            <div class="home-card-title" style="color: #581c87;">${config.nav_galeria || defaultConfig.nav_galeria}</div>
+            <p class="home-card-description" style="color: #6b21a8;">${pages.galeria.description}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistoriaPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action}20 0%, ${config.surface_color || defaultConfig.surface_color} 100%);">
+            <div class="flex items-center gap-6 mb-6">
+              <div class="text-8xl">🦝</div>
+              <div>
+                <h2 class="text-4xl font-black mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Origen del Nombre "Cusuco"</h2>
+                <p class="text-2xl font-bold" style="color: ${config.text_color || defaultConfig.text_color};">Decreto Legislativo 87-87 (1987)</p>
+                <p class="text-xl opacity-90 mt-2">Declarado Área Protegida por el Parlamento de Honduras</p>
+              </div>
+            </div>
+            <p class="text-lg leading-relaxed mb-4" style="color: ${config.text_color || defaultConfig.text_color};">
+              El Parque Nacional Cusuco es un ecosistema natural y bello de Honduras ubicado cerca de San Pedro Sula. Esta hermosa zona es un     rea protegida llena de muchos animales y plantas de diversas especies.
+            </p>
+            <div class="p-6 rounded-xl" style="background: ${config.primary_action || defaultConfig.primary_action}20; border-left: 6px solid ${config.primary_action || defaultConfig.primary_action};">
+              <p class="text-lg font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">🦝 ¿Por qué se llama "Cusuco"?</p>
+              <p class="text-lg leading-relaxed" style="color: ${config.text_color || defaultConfig.text_color};">
+                Su nombre se debe a que hace muchos años existían una gran cantidad de cusucos (armadillos) en toda esa zona, un animal característico de la región.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="content-card text-center card-hover">
+              <div class="text-6xl mb-4">📍</div>
+              <h3 class="text-2xl font-bold mb-4" style="color: ${config.primary_action || defaultConfig.primary_action};">Ubicación</h3>
+              <div class="space-y-3 text-left">
+                <div class="feature-box">
+                  <p class="font-bold mb-1">🗺️ Cordillera del Merendón</p>
+                  <p class="text-sm">20 km al oeste de San Pedro Sula</p>
+                </div>
+                <div class="feature-box">
+                  <p class="font-bold mb-1">⛰️ Altura Máxima</p>
+                  <p class="text-sm">2,242 metros sobre el nivel del mar</p>
+                </div>
+                <div class="feature-box">
+                  <p class="font-bold mb-1">🌲 Zona Núcleo</p>
+                  <p class="text-sm">10 kilómetros de extensión</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card text-center card-hover">
+              <div class="text-6xl mb-4">🌡️</div>
+              <h3 class="text-2xl font-bold mb-4" style="color: ${config.primary_action || defaultConfig.primary_action};">Clima</h3>
+              <div class="stat-number">19°C</div>
+              <p class="text-xl font-bold mb-3" style="color: ${config.text_color || defaultConfig.text_color};">Temperatura Media</p>
+              <div class="feature-box text-left">
+                <p class="font-bold mb-1">☁️ Características</p>
+                <p class="text-sm">Neblina y lloviznas frecuentes</p>
+                <p class="text-sm mt-2">Clima agradable para explorar</p>
+              </div>
+            </div>
+
+            <div class="content-card text-center card-hover">
+              <div class="text-6xl mb-4">🌳</div>
+              <h3 class="text-2xl font-bold mb-4" style="color: ${config.primary_action || defaultConfig.primary_action};">Composición</h3>
+              <div class="space-y-2 text-left text-sm">
+                <div class="feature-box">
+                  <p class="font-bold">🌲 Bosque de Coníferas Ralo</p>
+                </div>
+                <div class="feature-box">
+                  <p class="font-bold">🌿 Bosque Mixto</p>
+                </div>
+                <div class="feature-box">
+                  <p class="font-bold">🍃 Bosque Latifoliado</p>
+                </div>
+                <div class="feature-box">
+                  <p class="font-bold">🏞️ Tierras sin Bosque</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🦜 Biodiversidad Excepcional</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 rounded-xl card-hover" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-6xl">🦅</div>
+                  <div>
+                    <h4 class="text-2xl font-bold" style="color: #78350f;">Aves Majestuosas</h4>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-lg"><span class="font-bold">🦜 Quetzales</span> - Ave emblemática</p>
+                  <p class="text-lg"><span class="font-bold">🦜 Tucanes</span> - Coloridos habitantes</p>
+                  <p class="text-lg opacity-75">Y muchas especies más...</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl card-hover" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-6xl">🐆</div>
+                  <div>
+                    <h4 class="text-2xl font-bold" style="color: #7c2d12;">Grandes Mamíferos</h4>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <p class="text-lg"><span class="font-bold">🐆 Jaguares</span> - Depredadores apex</p>
+                  <p class="text-lg"><span class="font-bold">🦁 Pumas</span> - Felinos majestuosos</p>
+                  <p class="text-lg"><span class="font-bold">🦌 Tapires</span> - ⚠️ En peligro de extinción</p>
+                  <p class="text-lg"><span class="font-bold">🐵 Monos</span> - Habitantes del dosel</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-6xl">🐸</div>
+                  <div>
+                    <h4 class="text-2xl font-bold" style="color: #064e3b;">Anfibios Únicos</h4>
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="stat-number" style="font-size: 2.5rem;">29</div>
+                  <p class="text-lg font-bold">Especies de Anfibios</p>
+                  <div class="p-3 rounded-lg" style="background: rgba(255,255,255,0.5);">
+                    <p class="text-sm font-bold mb-1">🌟 6 especies únicas en el mundo</p>
+                    <p class="text-sm font-bold">⚠️ 16 en peligro de extinción</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl card-hover" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-6xl">🦇</div>
+                  <div>
+                    <h4 class="text-2xl font-bold" style="color: #312e81;">Murciélagos</h4>
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-center gap-8">
+                    <div class="text-center">
+                      <div class="stat-number" style="font-size: 2.5rem;">70</div>
+                      <p class="font-bold">Especies en Cusuco</p>
+                    </div>
+                    <div class="text-5xl opacity-50">/</div>
+                    <div class="text-center">
+                      <div class="stat-number" style="font-size: 2.5rem;">120</div>
+                      <p class="font-bold">En Honduras</p>
+                    </div>
+                  </div>
+                  <p class="text-sm text-center opacity-75">Más del 58% de especies hondureñas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🌿 Flora Extraordinaria</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="text-center card-hover p-6 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                <div class="text-7xl mb-4">🌿</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Helechos Gigantes</h4>
+                <div class="stat-number" style="font-size: 3rem;">20m+</div>
+                <p class="text-lg font-bold">de altura máxima</p>
+                <p class="mt-3 opacity-75">Especies prehistóricas imponentes</p>
+              </div>
+
+              <div class="text-center card-hover p-6 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                <div class="text-7xl mb-4">🦋</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Insectos</h4>
+                <p class="text-xl font-bold mb-3">Gran diversidad</p>
+                <div class="space-y-2">
+                  <p class="text-lg">    Escarabajos</p>
+                  <p class="text-lg">🦋 Mariposas</p>
+                  <p class="text-lg">    Y muchos más</p>
+                </div>
+              </div>
+
+              <div class="text-center card-hover p-6 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                <div class="text-7xl mb-4">🌳</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Árboles y Plantas</h4>
+                <p class="text-xl font-bold mb-3">Variedad extensa</p>
+                <p class="opacity-75 leading-relaxed">Cientos de especies de árboles nativos y plantas endémicas</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-center">
+              <div class="text-8xl mb-4">⚠️</div>
+              <h3 class="text-3xl font-black mb-4">Especies en Peligro de Extinción</h3>
+              <p class="text-xl mb-6 opacity-95">El Parque Nacional Cusuco alberga especies críticas que requieren protección inmediata</p>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🦌</div>
+                  <p class="text-2xl font-bold mb-2">Tapir Centroamericano</p>
+                  <p class="text-sm font-semibold mb-2">(Tapirus bairdii)</p>
+                  <p class="opacity-90">El mamífero terrestre más grande de Centroamérica, en peligro crítico</p>
+                </div>
+                
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🐸</div>
+                  <p class="text-2xl font-bold mb-2">16 Especies de Anfibios</p>
+                  <p class="text-sm font-semibold mb-2">Endémicas amenazadas</p>
+                  <p class="opacity-90">Incluyendo salamandras y ranas únicas del bosque nuboso</p>
+                </div>
+                
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🐆</div>
+                  <p class="text-2xl font-bold mb-2">Jaguar</p>
+                  <p class="text-sm font-semibold mb-2">(Panthera onca)</p>
+                  <p class="opacity-90">Depredador apex en peligro, vital para el equilibrio del ecosistema</p>
+                </div>
+                
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🦜</div>
+                  <p class="text-2xl font-bold mb-2">Quetzal Mesoamericano</p>
+                  <p class="text-sm font-semibold mb-2">(Pharomachrus mocinno)</p>
+                  <p class="opacity-90">Ave emblemática amenazada por pérdida de hábitat</p>
+                </div>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🐵</div>
+                  <p class="text-2xl font-bold mb-2">Mono Araña</p>
+                  <p class="text-sm font-semibold mb-2">(Ateles geoffroyi)</p>
+                  <p class="opacity-90">Primate en peligro crítico de extinción</p>
+                </div>
+                
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">  </div>
+                  <p class="text-2xl font-bold mb-2">Águila Arpía</p>
+                  <p class="text-sm font-semibold mb-2">(Harpia harpyja)</p>
+                  <p class="opacity-90">Ave rapaz más poderosa, casi extinta en Honduras</p>
+                </div>
+                
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-6xl mb-3">🐆</div>
+                  <p class="text-2xl font-bold mb-2">Puma</p>
+                  <p class="text-sm font-semibold mb-2">(Puma concolor)</p>
+                  <p class="opacity-90">Felino vulnerable por fragmentación de hábitat</p>
+                </div>
+              </div>
+              
+              <div class="mt-8 p-6 rounded-xl" style="background: rgba(0,0,0,0.3);">
+                <p class="text-2xl font-black mb-3">💚 Amenazas Principales</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                  <div>
+                    <p class="font-bold text-lg mb-1">🪓 Deforestación</p>
+                    <p class="text-base opacity-90">Pérdida acelerada de hábitat</p>
+                  </div>
+                  <div>
+                    <p class="font-bold text-lg mb-1">   Incendios Forestales</p>
+                    <p class="text-base opacity-90">Destrucción de ecosistemas</p>
+                  </div>
+                  <div>
+                    <p class="font-bold text-lg mb-1">🎯 Caza Furtiva</p>
+                    <p class="text-base opacity-90">Actividad ilegal persistente</p>
+                  </div>
+                </div>
+                <p class="text-xl mt-6 font-bold">
+                  La conservación del Parque Nacional Cusuco es vital para la supervivencia de estas especies
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActividadesPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">🥾</div>
+            <h2 class="text-4xl font-black mb-3">Actividades Turísticas y Recreativas</h2>
+            <p class="text-xl">Experiencias únicas en la Cordillera del Merendón</p>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, ${config.background_color || defaultConfig.background_color} 0%, #dcfce7 100%);">
+            <div class="flex items-center gap-6 mb-6">
+              <div class="text-7xl">🚗</div>
+              <div>
+                <h3 class="text-3xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Acceso al Parque</h3>
+                <p class="text-xl font-bold" style="color: ${config.text_color || defaultConfig.text_color};">Desde San Pedro Sula</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 rounded-xl" style="background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <div class="flex items-center gap-4 mb-3">
+                  <div class="text-5xl">🚙</div>
+                  <h4 class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">Transporte Privado</h4>
+                </div>
+                <p class="text-lg">Ideal para familias que desean explorar a su propio ritmo y comodidad</p>
+              </div>
+              <div class="p-6 rounded-xl" style="background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <div class="flex items-center gap-4 mb-3">
+                  <div class="text-5xl">🚌</div>
+                  <h4 class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">Tours Completos</h4>
+                </div>
+                <p class="text-lg">Servicio completo con guía, transporte y recorrido para una experiencia inolvidable</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🌲 Senderos del Parque Nacional Cusuco</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+              <div class="activity-card">
+                <div class="text-7xl text-center mb-4">💧</div>
+                <h3 class="text-2xl font-bold mb-4 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">Cascada Quetzal</h3>
+                
+                <div class="space-y-4">
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">📏</div>
+                    <div>
+                      <p class="font-bold text-lg">Distancia</p>
+                      <p class="text-base">4 km (2.5 millas) ida y vuelta</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">⏱️</div>
+                    <div>
+                      <p class="font-bold text-lg">Duración</p>
+                      <p class="text-base">Aproximadamente 1 hora</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">📊</div>
+                    <div>
+                      <p class="font-bold text-lg">Dificultad</p>
+                      <p class="text-base">Fácil - Ideal para principiantes</p>
+                    </div>
+                  </div>
+
+                  <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action}20 0%, ${config.primary_action || defaultConfig.primary_action}10 100%); border-left: 5px solid ${config.primary_action || defaultConfig.primary_action};">
+                    <p class="text-base leading-relaxed"><strong>🌿 Destacado:</strong> Caminata a través de exuberante bosque nublado hasta una cascada nombrada en honor al quetzal, ave emblemática de la región.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="activity-card">
+                <div class="text-7xl text-center mb-4">🦜</div>
+                <h3 class="text-2xl font-bold mb-4 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">Cascada del Tucán</h3>
+                
+                <div class="space-y-4">
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">⏱️</div>
+                    <div>
+                      <p class="font-bold text-lg">Duración</p>
+                      <p class="text-base">90 minutos ida y vuelta</p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">📊</div>
+                    <div>
+                      <p class="font-bold text-lg">Dificultad</p>
+                      <p class="text-base">Moderada</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-4 p-4 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <div class="text-4xl">🦎</div>
+                    <div>
+                      <p class="font-bold text-lg">Fauna Observable</p>
+                      <p class="text-base">Tucanes, ranas, monos aulladores</p>
+                    </div>
+                  </div>
+
+                  <div class="p-4 rounded-xl" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action}20 0%, ${config.primary_action || defaultConfig.primary_action}10 100%); border-left: 5px solid ${config.primary_action || defaultConfig.primary_action};">
+                    <p class="text-base leading-relaxed"><strong>🐾 Destacado:</strong> Excelente oportunidad para observar la diversa fauna del parque en su hábitat natural.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card mb-6" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+              <h4 class="text-2xl font-black mb-6 text-center" style="color: #78350f;">Senderos desde el Centro de Visitantes</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 rounded-xl card-hover" style="background: white;">
+                  <div class="text-6xl text-center mb-4">🐾</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">El Pizote</h5>
+                  <div class="space-y-2">
+                    <p class="text-base"><strong>📏 Distancia:</strong> 1-3 km</p>
+                    <p class="text-base"><strong>💧 Atractivos:</strong> Cristalinos riachuelos</p>
+                    <p class="text-base"><strong>🎵 Experiencia:</strong> Música de aves</p>
+                  </div>
+                </div>
+
+                <div class="p-6 rounded-xl card-hover" style="background: white;">
+                  <div class="text-6xl text-center mb-4">🦌</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">El Danto</h5>
+                  <div class="space-y-2">
+                    <p class="text-base"><strong>📏 Distancia:</strong> 1-3 km</p>
+                    <p class="text-base"><strong>👨‍  ‍👧 Tipo:</strong> Ideal para familias</p>
+                    <p class="text-base"><strong>🌳 Bosque:</strong> Primario y secundario</p>
+                  </div>
+                </div>
+
+                <div class="p-6 rounded-xl card-hover" style="background: white;">
+                  <div class="text-6xl text-center mb-4">⛏️</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Las Minas</h5>
+                  <div class="space-y-2">
+                    <p class="text-base"><strong>📏 Distancia:</strong> 1-3 km</p>
+                    <p class="text-base"><strong>🌲 Entorno:</strong> Bosque diverso</p>
+                    <p class="text-base"><strong>🎒 Acceso:</strong> Fácil desde centro</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+              <div class="flex items-center gap-6 mb-6">
+                <div class="text-7xl">⛰️</div>
+                <div>
+                  <h4 class="text-3xl font-black mb-2">Rutas Avanzadas</h4>
+                  <p class="text-xl opacity-90">Para excursionistas experimentados</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <h5 class="text-2xl font-bold mb-4">🏔️ Características</h5>
+                  <ul class="space-y-3 text-lg">
+                    <li>✓ Requieren mayor preparación física</li>
+                    <li>✓ Exploran áreas remotas del parque</li>
+                    <li>✓ Vistas panorámicas espectaculares</li>
+                    <li>✓ Observación de especies únicas</li>
+                  </ul>
+                </div>
+                <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                  <h5 class="text-2xl font-bold mb-4">      ‍🏫 Recomendación</h5>
+                  <p class="text-lg leading-relaxed mb-4">Se recomienda contratar un <strong>guía local</strong> para estas rutas.</p>
+                  <div class="p-4 rounded-lg" style="background: rgba(0,0,0,0.2);">
+                    <p class="text-base"><strong>💡 Beneficios del guía:</strong></p>
+                    <p class="text-base mt-2">• Conocimiento profundo del terreno</p>
+                    <p class="text-base">• Identificación de biodiversidad</p>
+                    <p class="text-base">• Garantiza tu seguridad</p>
+                    <p class="text-base">• Enriquece la experiencia</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🌟 Otras Actividades</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <svg width="80" height="80" viewBox="0 0 100 100">
+                    <circle cx="50" cy="45" r="35" fill="#10b981" opacity="0.2"/>
+                    <ellipse cx="50" cy="50" rx="12" ry="16" fill="#059669"/>
+                    <circle cx="48" cy="45" r="3" fill="white"/>
+                    <circle cx="47" cy="45" r="1.5" fill="black"/>
+                    <path d="M 50 55 Q 48 58 50 60 Q 52 58 50 55" fill="#f59e0b"/>
+                    <path d="M 38 50 Q 30 48 25 52 Q 30 55 38 53 Z" fill="#34d399"/>
+                    <path d="M 62 50 Q 70 48 75 52 Q 70 55 62 53 Z" fill="#34d399"/>
+                    <path d="M 45 60 Q 40 75 38 85" stroke="#059669" stroke-width="2" fill="none"/>
+                    <path d="M 55 60 Q 60 75 62 85" stroke="#059669" stroke-width="2" fill="none"/>
+                    <ellipse cx="50" cy="35" rx="5" ry="8" fill="#ef4444"/>
+                    <path d="M 50 25 Q 48 20 50 15 Q 52 20 50 25" fill="#ef4444"/>
+                    <path d="M 48 30 Q 40 25 35 28" stroke="#10b981" stroke-width="1.5" fill="none"/>
+                    <path d="M 52 30 Q 60 25 65 28" stroke="#10b981" stroke-width="1.5" fill="none"/>
+                  </svg>
+                  <h4 class="text-2xl font-bold" style="color: #1e3a8a;">Aviturismo</h4>
+                </div>
+                <p class="text-lg mb-6 leading-relaxed" style="color: #1e40af;">Observación de aves únicas en su hábitat natural. El Parque Nacional Cusuco es reconocido como uno de los mejores destinos de aviturismo en Honduras.</p>
+                <div class="grid grid-cols-3 gap-4">
+                  <div class="text-center p-4 rounded-xl card-hover" style="background: rgba(255,255,255,0.7);">
+                    <svg width="80" height="80" viewBox="0 0 140 160" style="margin: 0 auto;">
+                      <!-- Cola larga verde (dibujada primero, detrás) -->
+                      <path d="M 65 95 Q 58 115 55 145 Q 52 125 50 150" stroke="#10b981" stroke-width="3" fill="none" opacity="0.7"/>
+                      <path d="M 70 95 Q 70 118 70 155" stroke="#059669" stroke-width="4" fill="none"/>
+                      <path d="M 75 95 Q 82 115 85 145 Q 88 125 90 150" stroke="#10b981" stroke-width="3" fill="none" opacity="0.7"/>
+                      
+                      <!-- Cuerpo verde esmeralda -->
+                      <ellipse cx="70" cy="70" rx="22" ry="28" fill="#10b981"/>
+                      <ellipse cx="70" cy="68" rx="20" ry="25" fill="#34d399"/>
+                      
+                      <!-- Pecho rojo brillante -->
+                      <ellipse cx="70" cy="78" rx="16" ry="18" fill="#dc2626"/>
+                      <ellipse cx="70" cy="76" rx="14" ry="15" fill="#ef4444"/>
+                      
+                      <!-- Alas verdes con plumas detalladas -->
+                      <path d="M 48 70 Q 32 65 22 72 L 28 78 Q 38 75 48 76 Z" fill="#059669"/>
+                      <path d="M 48 72 L 40 70 L 42 74 L 46 74" fill="#10b981"/>
+                      <path d="M 92 70 Q 108 65 118 72 L 112 78 Q 102 75 92 76 Z" fill="#059669"/>
+                      <path d="M 92 72 L 100 70 L 98 74 L 94 74" fill="#10b981"/>
+                      
+                      <!-- Cabeza verde con cresta -->
+                      <circle cx="70" cy="48" r="16" fill="#10b981"/>
+                      <circle cx="70" cy="48" r="14" fill="#34d399"/>
+                      
+                      <!-- Cresta de plumas puntiaguda -->
+                      <path d="M 62 38 Q 60 30 62 24 L 64 32 Z" fill="#059669"/>
+                      <path d="M 70 35 Q 70 26 70 20 L 70 32 Z" fill="#047857"/>
+                      <path d="M 78 38 Q 80 30 78 24 L 76 32 Z" fill="#059669"/>
+                      
+                      <!-- Ojo grande expresivo -->
+                      <circle cx="67" cy="48" r="5" fill="white"/>
+                      <circle cx="67" cy="48" r="3" fill="#1f2937"/>
+                      <circle cx="68" cy="47" r="1.5" fill="white"/>
+                      
+                      <!-- Pico pequeño amarillo -->
+                      <path d="M 70 54 Q 68 57 70 59 Q 72 57 70 54" fill="#fbbf24"/>
+                      
+                      <!-- Detalles de plumas en el cuerpo -->
+                      <path d="M 60 65 Q 55 67 52 70" stroke="#047857" stroke-width="1" opacity="0.5"/>
+                      <path d="M 80 65 Q 85 67 88 70" stroke="#047857" stroke-width="1" opacity="0.5"/>
+                      
+                      <!-- Patas pequeñas -->
+                      <path d="M 66 94 L 64 100" stroke="#78716c" stroke-width="2.5"/>
+                      <path d="M 74 94 L 76 100" stroke="#78716c" stroke-width="2.5"/>
+                      
+                      <!-- Plumas decorativas en cola -->
+                      <ellipse cx="70" cy="92" rx="8" ry="4" fill="#10b981" opacity="0.6"/>
+                    </svg>
+                    <p class="font-bold text-sm mt-2">Quetzal</p>
+                    <p class="text-xs opacity-75">Pharomachrus mocinno</p>
+                  </div>
+                  <div class="text-center p-4 rounded-xl card-hover" style="background: rgba(255,255,255,0.7);">
+                    <svg width="80" height="80" viewBox="0 0 140 140" style="margin: 0 auto;">
+                      <!-- Cuerpo negro redondeado -->
+                      <ellipse cx="70" cy="75" rx="24" ry="32" fill="#1f2937"/>
+                      
+                      <!-- Pecho/vientre amarillo brillante -->
+                      <ellipse cx="70" cy="72" rx="20" ry="26" fill="#fbbf24"/>
+                      <ellipse cx="70" cy="68" rx="18" ry="22" fill="#fde047"/>
+                      
+                      <!-- Alas negras -->
+                      <path d="M 46 75 Q 28 70 18 78 L 24 86 Q 38 82 46 82 Z" fill="#374151"/>
+                      <path d="M 94 75 Q 112 70 122 78 L 116 86 Q 102 82 94 82 Z" fill="#374151"/>
+                      
+                      <!-- Cabeza negra grande -->
+                      <circle cx="70" cy="50" r="18" fill="#1f2937"/>
+                      
+                      <!-- PICO ENORME Y COLORIDO (característica principal del tucán) -->
+                      <!-- Base del pico -->
+                      <ellipse cx="92" cy="50" rx="26" ry="11" fill="#f97316"/>
+                      <ellipse cx="92" cy="48" rx="24" ry="9" fill="#fb923c"/>
+                      <!-- Franja roja en el medio del pico -->
+                      <ellipse cx="92" cy="50" rx="22" ry="3" fill="#dc2626"/>
+                      <!-- Punta del pico -->
+                      <ellipse cx="100" cy="50" rx="12" ry="8" fill="#fbbf24"/>
+                      <path d="M 112 50 Q 116 50 116 50" stroke="#78716c" stroke-width="2"/>
+                      <!-- Detalles del pico -->
+                      <line x1="70" y1="50" x2="90" y2="50" stroke="#450a0a" stroke-width="1.5"/>
+                      
+                      <!-- Anillo ocular blanco (muy característico) -->
+                      <circle cx="62" cy="48" r="7" fill="#60a5fa"/>
+                      <circle cx="62" cy="48" r="6" fill="white"/>
+                      <circle cx="62" cy="48" r="4" fill="#1f2937"/>
+                      <circle cx="63" cy="47" r="1.5" fill="white"/>
+                      
+                      <!-- Garganta blanca/amarilla -->
+                      <ellipse cx="70" cy="62" rx="12" ry="8" fill="#fffbeb"/>
+                      
+                      <!-- Rabadilla/trasero rojo característico -->
+                      <ellipse cx="70" cy="100" rx="14" ry="8" fill="#dc2626"/>
+                      
+                      <!-- Cola negra corta -->
+                      <path d="M 62 105 Q 60 115 58 122" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+                      <path d="M 70 106 Q 70 116 70 124" stroke="#1f2937" stroke-width="5" stroke-linecap="round"/>
+                      <path d="M 78 105 Q 80 115 82 122" stroke="#1f2937" stroke-width="4" stroke-linecap="round"/>
+                      
+                      <!-- Patas grises gruesas -->
+                      <path d="M 66 105 L 64 115" stroke="#6b7280" stroke-width="3"/>
+                      <path d="M 74 105 L 76 115" stroke="#6b7280" stroke-width="3"/>
+                      
+                      <!-- Detalles adicionales -->
+                      <path d="M 48 78 Q 42 80 38 82" stroke="#1f2937" stroke-width="1.5" opacity="0.6"/>
+                      <path d="M 92 78 Q 98 80 102 82" stroke="#1f2937" stroke-width="1.5" opacity="0.6"/>
+                    </svg>
+                    <p class="font-bold text-sm mt-2">Tucán</p>
+                    <p class="text-xs opacity-75">Ramphastos sulfuratus</p>
+                  </div>
+                  <div class="text-center p-4 rounded-xl card-hover" style="background: rgba(255,255,255,0.7);">
+                    <svg width="80" height="80" viewBox="0 0 130 130" style="margin: 0 auto;">
+                      <!-- Cuerpo amarillo brillante -->
+                      <ellipse cx="65" cy="68" rx="18" ry="24" fill="#fbbf24"/>
+                      <ellipse cx="65" cy="66" rx="16" ry="21" fill="#fde047"/>
+                      
+                      <!-- Cabeza amarilla redondeada -->
+                      <circle cx="65" cy="45" r="15" fill="#fbbf24"/>
+                      <circle cx="65" cy="45" r="13" fill="#fde047"/>
+                      
+                      <!-- Gorro/capucha negra característica del jilguero -->
+                      <ellipse cx="65" cy="36" rx="13" ry="8" fill="#1f2937"/>
+                      <path d="M 52 36 Q 65 32 78 36 Q 75 40 65 41 Q 55 40 52 36" fill="#1f2937"/>
+                      
+                      <!-- Mejilla blanca -->
+                      <circle cx="58" cy="44" r="4" fill="white" opacity="0.8"/>
+                      
+                      <!-- Ojo grande y expresivo -->
+                      <circle cx="60" cy="44" r="4" fill="white"/>
+                      <circle cx="60" cy="44" r="2.5" fill="#1f2937"/>
+                      <circle cx="61" cy="43" r="1" fill="white"/>
+                      
+                      <!-- Pico cónico pequeño rosado/naranja -->
+                      <path d="M 65 50 Q 63 53 65 55 Q 67 53 65 50" fill="#fb923c"/>
+                      <path d="M 65 50 L 65 55" stroke="#f97316" stroke-width="0.5"/>
+                      
+                      <!-- Alas amarillas con marcas negras -->
+                      <path d="M 47 68 Q 34 64 26 70 Q 30 76 47 73 Z" fill="#fbbf24"/>
+                      <!-- Barra negra en el ala -->
+                      <path d="M 45 68 L 38 66 L 36 70 L 43 72 Z" fill="#1f2937"/>
+                      <path d="M 40 70 L 34 70" stroke="#1f2937" stroke-width="2"/>
+                      
+                      <path d="M 83 68 Q 96 64 104 70 Q 100 76 83 73 Z" fill="#fbbf24"/>
+                      <!-- Barra negra en el ala -->
+                      <path d="M 85 68 L 92 66 L 94 70 L 87 72 Z" fill="#1f2937"/>
+                      <path d="M 90 70 L 96 70" stroke="#1f2937" stroke-width="2"/>
+                      
+                      <!-- Pecho amarillo brillante -->
+                      <ellipse cx="65" cy="74" rx="13" ry="10" fill="#fde047"/>
+                      
+                      <!-- Vientre más claro -->
+                      <ellipse cx="65" cy="82" rx="11" ry="8" fill="#fef3c7"/>
+                      
+                      <!-- Cola con plumas negras y amarillas -->
+                      <path d="M 58 90 Q 56 100 54 108" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M 65 92 Q 65 102 65 110" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+                      <path d="M 72 90 Q 74 100 76 108" stroke="#1f2937" stroke-width="3" stroke-linecap="round"/>
+                      
+                      <!-- Patas delgadas grises -->
+                      <path d="M 61 90 L 59 98" stroke="#78716c" stroke-width="2"/>
+                      <path d="M 69 90 L 71 98" stroke="#78716c" stroke-width="2"/>
+                      
+                      <!-- Detalles de plumas -->
+                      <path d="M 55 60 Q 50 58 48 60" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+                      <path d="M 75 60 Q 80 58 82 60" stroke="#f59e0b" stroke-width="1" opacity="0.5"/>
+                    </svg>
+                    <p class="font-bold text-sm mt-2">Jilguero</p>
+                    <p class="text-xs opacity-75">Spinus tristis</p>
+                  </div>
+                </div>
+                <p class="text-base mt-4 text-center font-bold" style="color: #1e3a8a;">Y muchas especies más...</p>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-7xl">📸</div>
+                  <h4 class="text-2xl font-bold" style="color: #831843;">Fotografía de Naturaleza</h4>
+                </div>
+                <p class="text-lg mb-6 leading-relaxed" style="color: #9f1239;">El hermoso paisaje regala vistas increíbles donde puedes capturar las mejores fotografías.</p>
+                <div class="space-y-3">
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.6);">
+                    <p class="font-bold text-base mb-1">⛰️ Áreas Montañosas</p>
+                    <p class="text-sm opacity-75">Vistas panorámicas impresionantes</p>
+                  </div>
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.6);">
+                    <p class="font-bold text-base mb-1">💧 Bellas Cascadas</p>
+                    <p class="text-sm opacity-75">Aguas cristalinas en entorno natural</p>
+                  </div>
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.6);">
+                    <p class="font-bold text-base mb-1">🌺 Hermosa Flora</p>
+                    <p class="text-sm opacity-75">Orquídeas, helechos y vegetación única</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);">
+            <div class="flex items-center gap-6 mb-6">
+              <div class="text-8xl">☕</div>
+              <div>
+                <h3 class="text-3xl font-black mb-2" style="color: #7c2d12;">Turismo de Café</h3>
+                <p class="text-xl font-bold" style="color: #92400e;">Cultivo Sostenible en el Merendón</p>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-6xl text-center mb-4">🌱</div>
+                <h4 class="text-2xl font-bold text-center mb-4" style="color: ${config.primary_action || defaultConfig.primary_action};">Fincas Cafetaleras</h4>
+                <p class="text-lg leading-relaxed mb-4">Pequeñas fincas que ofrecen experiencias educativas sobre el cultivo sostenible del café.</p>
+                <div class="space-y-2">
+                  <p class="text-base">✓ Tours por plantaciones</p>
+                  <p class="text-base">✓ Proceso de producción</p>
+                  <p class="text-base">✓ Prácticas sostenibles</p>
+                  <p class="text-base">✓ Degustación de café premium</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-6xl text-center mb-4">☕</div>
+                <h4 class="text-2xl font-bold text-center mb-4" style="color: ${config.primary_action || defaultConfig.primary_action};">Cafeterías Escénicas</h4>
+                <p class="text-lg leading-relaxed mb-4">Hermosas cafeterías donde puedes pasar momentos relajados apreciando la naturaleza.</p>
+                <div class="p-4 rounded-xl text-center" style="background: ${config.background_color || defaultConfig.background_color};">
+                  <p class="text-base font-bold mb-2">🌄 Experiencia Única</p>
+                  <p class="text-base">Disfruta de un excelente café mientras contemplas las montañas y el bosque nuboso</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderMapaPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">🗺️</div>
+            <h2 class="text-4xl font-black mb-3">Mapa Interactivo del Parque</h2>
+            <p class="text-xl">Haz clic en los marcadores para obtener información detallada</p>
+          </div>
+
+          <div class="content-card mb-8">
+            <div class="map-container">
+              <div class="map-marker" style="top: 15%; left: 50%;" onclick="showMapInfo('jilinco')">
+                <div class="text-6xl mb-2">⛰️</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Cerro Jilinco</p>
+                  <p class="text-xs opacity-75">2,242 msnm</p>
+                </div>
+              </div>
+
+              <div class="map-marker" style="top: 30%; left: 25%;" onclick="showMapInfo('quetzales')">
+                <div class="text-5xl mb-2">🦜</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Los Quetzales</p>
+                </div>
+              </div>
+
+              <div class="map-marker" style="top: 50%; right: 20%;" onclick="showMapInfo('cascada')">
+                <div class="text-5xl mb-2">💧</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Cascadas</p>
+                </div>
+              </div>
+
+              <div class="map-marker" style="bottom: 20%; left: 30%;" onclick="showMapInfo('centro')">
+                <div class="text-5xl mb-2">🏛️</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Centro de Visitantes</p>
+                </div>
+              </div>
+
+              <div class="map-marker" style="top: 40%; left: 60%;" onclick="showMapInfo('hortensias')">
+                <div class="text-5xl mb-2">🌸</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Campo de Hortensias</p>
+                </div>
+              </div>
+
+              <div class="map-marker" style="bottom: 25%; right: 25%;" onclick="showMapInfo('camping')">
+                <div class="text-5xl mb-2">🏕️</div>
+                <div class="marker-label">
+                  <p class="text-sm font-bold">Área de Camping</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="map-info" class="mt-6 p-6 rounded-xl" style="background: ${config.background_color || defaultConfig.background_color}; display: none;">
+              <h3 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};" id="map-info-title"></h3>
+              <p class="text-lg mb-4" id="map-info-description"></p>
+              <div id="map-info-details"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderObservacionesPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">🔍</div>
+            <h2 class="text-4xl font-black mb-3">Observaciones de Campo</h2>
+            <p class="text-xl">Análisis detallado de la experiencia del visitante</p>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+            <div class="text-6xl mb-4">📊</div>
+            <h3 class="text-3xl font-black mb-4" style="color: #312e81;">Evaluación General del Parque</h3>
+            <p class="text-xl mb-6" style="color: #3730a3;">Análisis basado en visitas de campo y retroalimentación de visitantes</p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-5xl mb-3">  </div>
+                <div class="text-4xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">8.5/10</div>
+                <p class="font-bold">Experiencia General</p>
+              </div>
+              
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-5xl mb-3">🏞️</div>
+                <div class="text-4xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">9.8/10</div>
+                <p class="font-bold">Belleza Natural</p>
+              </div>
+              
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-5xl mb-3">🛤️</div>
+                <div class="text-4xl font-black mb-2" style="color: #f59e0b;">6.2/10</div>
+                <p class="font-bold">Infraestructura</p>
+              </div>
+              
+              <div class="p-6 rounded-xl" style="background: white;">
+                <div class="text-5xl mb-3">🤝</div>
+                <div class="text-4xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">9.5/10</div>
+                <p class="font-bold">Atención Local</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="content-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="text-6xl">⚠️</div>
+                <div>
+                  <h3 class="text-3xl font-black" style="color: #78350f;">Puntos de Dolor</h3>
+                  <p class="text-lg" style="color: #92400e;">Aspectos que requieren atención y mejora</p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('dolor1')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🚧</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Falta de Señalización</h4>
+                        <span id="dolor1-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">El lugar no posee información sobre qué rutas se deben tomar. Los guías turísticos brindan información necesaria para precaución y cuidado.</p>
+                      
+                      <div id="dolor1-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">🔍 Observaciones detalladas:</p>
+                          <ul class="space-y-2 text-sm" style="color: #92400e;">
+                            <li>• No se observaban señalizaciones en los senderos principales</li>
+                            <li>• Hay puntos de las carreteras en mal estado</li>
+                            <li>• Se requiere pleno cuidado para evitar accidentes trágicos</li>
+                            <li>• La orientación depende completamente del conocimiento de los guías locales</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div class="p-3 rounded-lg" style="background: #fee2e2;">
+                            <p class="font-bold text-sm mb-1" style="color: #991b1b;">⚠️ Nivel de Impacto</p>
+                            <p class="text-sm">Alto - Afecta seguridad del visitante</p>
+                          </div>
+                          <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                            <p class="font-bold text-sm mb-1" style="color: #166534;">💡 Solución Recomendada</p>
+                            <p class="text-sm">Siempre contrata un guía local certificado</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('dolor2')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🚗</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Accesibilidad Limitada</h4>
+                        <span id="dolor2-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">Los caminos son de difícil acceso para vehículos pequeños ya que no todos se encuentran en buenas condiciones.</p>
+                      
+                      <div id="dolor2-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">🔍 Observaciones detalladas:</p>
+                          <ul class="space-y-2 text-sm" style="color: #92400e;">
+                            <li>• Carreteras estrechas y con pendientes pronunciadas</li>
+                            <li>• Algunos tramos con baches y superficies irregulares</li>
+                            <li>• Se requieren vehículos grandes tipo SUV o 4x4</li>
+                            <li>• Vehículos pequeños pueden sufrir daños mecánicos</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #e0e7ff;">
+                          <p class="font-bold mb-2" style="color: #312e81;">🚙 Tipo de vehículo recomendado:</p>
+                          <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <p class="font-bold text-green-700">✓ Recomendado:</p>
+                              <p>• SUV grandes</p>
+                              <p>• Pickups 4x4</p>
+                              <p>• Vehículos con alta suspensión</p>
+                            </div>
+                            <div>
+                              <p class="font-bold text-red-700">✗ No recomendado:</p>
+                              <p>• Sedanes pequeños</p>
+                              <p>• Vehículos deportivos bajos</p>
+                              <p>• Compactos urbanos</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">💡 Alternativa</p>
+                          <p class="text-sm">Contratar transporte local o tours que incluyen traslado</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('dolor3')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">♻️</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Gestión de Residuos</h4>
+                        <span id="dolor3-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">Se observó un espacio limpio de basura que el ser humano en ocasiones deja tirada. Hay ramas y árboles caídos por razones naturales.</p>
+                      
+                      <div id="dolor3-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">🔍 Observaciones detalladas:</p>
+                          <ul class="space-y-2 text-sm" style="color: #92400e;">
+                            <li>• En general el parque se mantiene limpio</li>
+                            <li>• Basura ocasional dejada por visitantes irresponsables</li>
+                            <li>• Ramas y árboles caídos en senderos (causas naturales)</li>
+                            <li>• Falta de contenedores de basura en puntos estratégicos</li>
+                            <li>• No hay sistema formal de reciclaje</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #d1fae5;">
+                          <p class="font-bold mb-2" style="color: #064e3b;">🌿 Principios de "No Dejar Rastro":</p>
+                          <div class="space-y-2 text-sm">
+                            <p>✓ Lleva tu basura de regreso</p>
+                            <p>✓ No dejes restos de comida</p>
+                            <p>✓ Usa contenedores reutilizables</p>
+                            <p>✓ Respeta la vegetación caída (es hábitat natural)</p>
+                            <p>✓ No alteres el entorno natural</p>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">💚 Tu responsabilidad</p>
+                          <p class="text-sm">Cada visitante debe ser guardián del parque y llevarse toda su basura</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('dolor4')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">📢</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Promoción Insuficiente</h4>
+                        <span id="dolor4-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">No hay mucha información turística sobre el lugar, aún es un espacio de poco conocimiento.</p>
+                      
+                      <div id="dolor4-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">🔍 Observaciones detalladas:</p>
+                          <ul class="space-y-2 text-sm" style="color: #92400e;">
+                            <li>• Poca presencia en medios digitales y redes sociales</li>
+                            <li>• Información limitada en sitios web de turismo</li>
+                            <li>• Desconocimiento del público general sobre el parque</li>
+                            <li>• Falta de material promocional en agencias de viaje</li>
+                            <li>• Potencial turístico subutilizado</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #fce7f3;">
+                          <p class="font-bold mb-2" style="color: #831843;">📊 Impacto:</p>
+                          <div class="space-y-2 text-sm">
+                            <p>• Menor flujo de visitantes del potencial real</p>
+                            <p>• Menos ingresos para comunidades locales</p>
+                            <p>• Menor conciencia sobre conservación</p>
+                            <p>• Oportunidad perdida de turismo sostenible</p>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">✨ Cómo puedes ayudar</p>
+                          <p class="text-sm">Comparte tu experiencia en redes sociales y recomienda el parque</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="text-6xl">✨</div>
+                <div>
+                  <h3 class="text-3xl font-black" style="color: #064e3b;">Puntos de Placer</h3>
+                  <p class="text-lg" style="color: #065f46;">Experiencias excepcionales que destacan</p>
+                </div>
+              </div>
+              
+              <div class="space-y-4">
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('placer1')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🏞️</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Vistas Panorámicas</h4>
+                        <span id="placer1-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">El lugar posee hermosas vistas las cuales generan sensación de paz y tranquilidad.</p>
+                      
+                      <div id="placer1-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #d1fae5;">
+                          <p class="font-bold mb-2" style="color: #064e3b;">     Lugares destacados:</p>
+                          <div class="space-y-3 text-sm" style="color: #065f46;">
+                            <div class="p-3 rounded-lg" style="background: white;">
+                              <p class="font-bold mb-1">💧 Las Cascadas</p>
+                              <p>Aguas cristalinas que caen creando un ambiente mágico. El sonido del agua genera una experiencia relajante y terapéutica. Perfectas para contemplación y meditación.</p>
+                            </div>
+                            
+                            <div class="p-3 rounded-lg" style="background: white;">
+                              <p class="font-bold mb-1">🌸 Campo de Hortensias</p>
+                              <p>Extenso campo de flores coloridas que crean un paisaje de ensueño. Las hortensias varían en tonos azules, rosas y violetas. Un lugar fotográfico incomparable.</p>
+                            </div>
+                            
+                            <div class="p-3 rounded-lg" style="background: white;">
+                              <p class="font-bold mb-1">⛰️ Miradores Naturales</p>
+                              <p>Puntos estratégicos con vistas al Valle de Sula y las montañas circundantes. En días despejados se puede ver hasta la costa atlántica.</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div class="p-3 rounded-lg" style="background: #fef3c7;">
+                            <p class="font-bold text-sm mb-1" style="color: #78350f;">📸 Fotografía</p>
+                            <p class="text-sm">Ideal para capturar paisajes únicos. Lleva tu cámara o smartphone bien cargado.</p>
+                          </div>
+                          <div class="p-3 rounded-lg" style="background: #e0e7ff;">
+                            <p class="font-bold text-sm mb-1" style="color: #312e81;">🧘 Relajación</p>
+                            <p class="text-sm">Perfecto para desconectar del estrés urbano y reconectar con la naturaleza.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('placer2')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🦋</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Biodiversidad Excepcional</h4>
+                        <span id="placer2-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">El ambiente es muy recomendado para los amantes de la naturaleza que hacen investigaciones sobre la flora y la fauna.</p>
+                      
+                      <div id="placer2-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #d1fae5;">
+                          <p class="font-bold mb-2" style="color: #064e3b;">🔬 Oportunidades de investigación:</p>
+                          <ul class="space-y-2 text-sm" style="color: #065f46;">
+                            <li>• <strong>Aviturismo científico:</strong> Más de 200 especies de aves, incluyendo quetzales y tucanes</li>
+                            <li>• <strong>Estudios de anfibios:</strong> 29 especies, 6 endémicas del parque</li>
+                            <li>• <strong>Flora única:</strong> Helechos gigantes, orquídeas, bromelias y especies medicinales</li>
+                            <li>• <strong>Mamíferos:</strong> Observación de pumas, jaguares, monos y tapires (con mucha paciencia)</li>
+                            <li>• <strong>Entomología:</strong> Mariposas, escarabajos y otros insectos raros</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">👨‍🔬 Perfil ideal:</p>
+                          <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                              <p class="font-bold mb-1">Científicos y Estudiantes:</p>
+                              <p>• Biólogos</p>
+                              <p>• Ecólogos</p>
+                              <p>• Estudiantes universitarios</p>
+                              <p>• Tesistas</p>
+                            </div>
+                            <div>
+                              <p class="font-bold mb-1">Entusiastas:</p>
+                              <p>• Fotógrafos naturalistas</p>
+                              <p>• Observadores de aves</p>
+                              <p>• Ecoturistas</p>
+                              <p>• Documentalistas</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">🌿 Ventaja única</p>
+                          <p class="text-sm">Ecosistema de bosque nuboso prácticamente intacto, ideal para estudios de conservación</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('placer3')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🌡️</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Clima Agradable</h4>
+                        <span id="placer3-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">Es un ambiente fresco con ciertos momentos cambiantes que puede variar entre lo helado, lluvioso y también se siente el calorcito del sol.</p>
+                      
+                      <div id="placer3-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #d1fae5;">
+                          <p class="font-bold mb-2" style="color: #064e3b;">🌤️ Características climáticas:</p>
+                          <div class="space-y-3 text-sm" style="color: #065f46;">
+                            <div class="grid grid-cols-3 gap-3">
+                              <div class="p-3 rounded-lg text-center" style="background: white;">
+                                <p class="text-3xl mb-1">❄️</p>
+                                <p class="font-bold">Fresco</p>
+                                <p class="text-xs">12-16°C mañanas</p>
+                              </div>
+                              <div class="p-3 rounded-lg text-center" style="background: white;">
+                                <p class="text-3xl mb-1">☁️</p>
+                                <p class="font-bold">Templado</p>
+                                <p class="text-xs">16-22°C medio día</p>
+                              </div>
+                              <div class="p-3 rounded-lg text-center" style="background: white;">
+                                <p class="text-3xl mb-1">🌧️</p>
+                                <p class="font-bold">Húmedo</p>
+                                <p class="text-xs">Neblina frecuente</p>
+                              </div>
+                            </div>
+                            
+                            <div class="p-3 rounded-lg" style="background: white;">
+                              <p class="font-bold mb-2">    Variaciones por temporada:</p>
+                              <p class="mb-1"><strong>Época Seca (Nov-Abr):</strong> Días más soleados, mañanas frescas, ideal para senderismo</p>
+                              <p><strong>Época Lluviosa (May-Oct):</strong> Lloviznas frecuentes, más neblina, vegetación más verde</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">🎒 Qué llevar:</p>
+                          <div class="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <p>✓ Chaqueta impermeable</p>
+                              <p>✓ Ropa en capas</p>
+                              <p>✓ Gorro o gorra</p>
+                            </div>
+                            <div>
+                              <p>✓ Protector solar</p>
+                              <p>✓ Calzado antideslizante</p>
+                              <p>✓ Termo con bebida caliente</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">🌟 Ventaja</p>
+                          <p class="text-sm">Escape perfecto del calor de San Pedro Sula (hasta 15°C de diferencia)</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl card-hover" style="background: white; cursor: pointer;" onclick="toggleDetail('placer4')">
+                  <div class="flex items-start gap-4">
+                    <div class="text-4xl">🤝</div>
+                    <div class="flex-1">
+                      <div class="flex items-center justify-between">
+                        <h4 class="text-xl font-bold mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">Interacción Local</h4>
+                        <span id="placer4-icon" class="text-2xl font-bold" style="color: ${config.primary_action || defaultConfig.primary_action};">+</span>
+                      </div>
+                      <p class="text-base leading-relaxed mb-2">De entrada, te dan un recibimiento muy amigable los locatarios y te hacen sentir seguro. La comunidad del lugar es muy servicial y trabajadora.</p>
+                      
+                      <div id="placer4-detail" style="display: none; margin-top: 1rem;">
+                        <div class="p-4 rounded-lg mb-3" style="background: #d1fae5;">
+                          <p class="font-bold mb-2" style="color: #064e3b;">👥 Experiencia comunitaria:</p>
+                          <ul class="space-y-2 text-sm" style="color: #065f46;">
+                            <li>• <strong>Recibimiento cálido:</strong> Los locatarios te saludan con amabilidad genuina</li>
+                            <li>• <strong>Seguridad:</strong> Te hacen sentir protegido y bienvenido desde el primer momento</li>
+                            <li>• <strong>Conocimiento local:</strong> Los guías comparten historias y conocimientos ancestrales</li>
+                            <li>• <strong>Hospitalidad:</strong> Comunidad servicial y siempre dispuesta a ayudar</li>
+                            <li>• <strong>Autenticidad:</strong> Experiencia genuina sin artificios turísticos</li>
+                          </ul>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #fef3c7;">
+                          <p class="font-bold mb-2" style="color: #78350f;">☕ Productos locales para consumir:</p>
+                          <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div class="space-y-1">
+                              <p>• ☕ Café orgánico local</p>
+                              <p>• 🍯 Miel de montaña</p>
+                              <p>•    Pan casero fresco</p>
+                              <p>• 🍲 Comidas típicas</p>
+                            </div>
+                            <div class="space-y-1">
+                              <p>• 🧃 Jugos naturales</p>
+                              <p>• 🌿 Plantas medicinales</p>
+                              <p>• 🎨 Artesanías locales</p>
+                              <p>• 🥗 Vegetales orgánicos</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="p-4 rounded-lg mb-3" style="background: #e0e7ff;">
+                          <p class="font-bold mb-2" style="color: #312e81;">    Importancia económica:</p>
+                          <p class="text-sm mb-2">Al consumir productos locales estás:</p>
+                          <div class="space-y-1 text-sm">
+                            <p>✓ Apoyando directamente a las familias del parque</p>
+                            <p>✓ Incentivando la conservación del bosque</p>
+                            <p>✓ Fomentando el turismo sostenible</p>
+                            <p>✓ Promoviendo alternativas económicas a la tala</p>
+                            <p>✓ Preservando el modo de vida tradicional</p>
+                          </div>
+                        </div>
+                        
+                        <div class="p-3 rounded-lg" style="background: #dcfce7;">
+                          <p class="font-bold text-sm mb-1" style="color: #166534;">💚 Tu impacto positivo</p>
+                          <p class="text-sm">Cada compra local es un voto por la conservación y el desarrollo comunitario sostenible</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderPerfilPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">👥</div>
+            <h2 class="text-4xl font-black mb-3">Perfil de Turistas</h2>
+            <p class="text-xl">Segmentación y análisis del visitante ideal</p>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+            <div class="text-center mb-6">
+              <div class="text-6xl mb-4">🎯</div>
+              <h3 class="text-3xl font-black mb-3" style="color: #312e81;">Segmentación del Turista</h3>
+              <p class="text-xl" style="color: #3730a3;">Conoce el perfil del visitante del Parque Nacional Cusuco</p>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">📍 Segmentación Geográfica</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); cursor: pointer;" onclick="toggleDetail('geo1')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">🌎</div>
+                    <h4 class="text-2xl font-bold" style="color: #064e3b;">Procedencia de Visitantes</h4>
+                  </div>
+                  <span id="geo1-icon" class="text-3xl font-bold" style="color: #064e3b;">+</span>
+                </div>
+                <p class="text-lg mb-4" style="color: #065f46;">Turistas de diversos orígenes con interés en el ecoturismo</p>
+                
+                <div id="geo1-detail" style="display: none; margin-top: 1rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🏙️</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Turistas Locales</p>
+                      </div>
+                      <p class="text-base mb-3">Principalmente de San Pedro Sula y áreas metropolitanas cercanas</p>
+                      <div class="flex justify-between items-center p-3 rounded-lg" style="background: #d1fae5;">
+                        <span class="font-bold">Proporción:</span>
+                        <span class="text-2xl font-black" style="color: #064e3b;">45%</span>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🇭🇳</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Visitantes Nacionales</p>
+                      </div>
+                      <p class="text-base mb-3">De otros departamentos de Honduras (Tegucigalpa, La Ceiba, etc.)</p>
+                      <div class="flex justify-between items-center p-3 rounded-lg" style="background: #d1fae5;">
+                        <span class="font-bold">Proporción:</span>
+                        <span class="text-2xl font-black" style="color: #064e3b;">33%</span>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">✈️</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Turistas Internacionales</p>
+                      </div>
+                      <p class="text-base mb-3">Ecoturistas de USA, Canadá, Europa y otros países</p>
+                      <div class="flex justify-between items-center p-3 rounded-lg" style="background: #d1fae5;">
+                        <span class="font-bold">Proporción:</span>
+                        <span class="text-2xl font-black" style="color: #064e3b;">22%</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); cursor: pointer;" onclick="toggleDetail('geo2')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">🚗</div>
+                    <h4 class="text-2xl font-bold" style="color: #78350f;">Acceso al Parque</h4>
+                  </div>
+                  <span id="geo2-icon" class="text-3xl font-bold" style="color: #78350f;">+</span>
+                </div>
+                <p class="text-lg mb-4" style="color: #92400e;">Opciones de transporte para llegar al destino</p>
+                
+                <div id="geo2-detail" style="display: none; margin-top: 1rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🚙</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Vehículos Grandes</p>
+                      </div>
+                      <p class="text-base mb-3"><strong>Requisito indispensable:</strong> Por las condiciones del camino, es necesario utilizar vehículos grandes</p>
+                      <div class="space-y-2 text-sm">
+                        <p>✓ SUVs y camionetas 4x4</p>
+                        <p>✓ Pickups de alta suspensión</p>
+                        <p>✓ Vehículos con capacidad para terreno irregular</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🚗</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Vehículos Personales</p>
+                      </div>
+                      <p class="text-base">Puedes llegar en tu propio vehículo grande, ideal para quienes prefieren independencia y flexibilidad de horarios</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🚌</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Tours Organizados</p>
+                      </div>
+                      <p class="text-base mb-3">Tours debidamente organizados que incluyen transporte, guía y toda la logística</p>
+                      <div class="p-3 rounded-lg" style="background: #fef3c7;">
+                        <p class="text-sm font-bold">💡 Ventajas del tour:</p>
+                        <p class="text-sm">• No te preocupas por el vehículo</p>
+                        <p class="text-sm">• Experiencia guiada profesional</p>
+                        <p class="text-sm">• Todo incluido en un paquete</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">👤 Segmentación Demográfica</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); cursor: pointer;" onclick="toggleDetail('demo1')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">   </div>
+                    <h4 class="text-2xl font-bold" style="color: #1e3a8a;">Edad</h4>
+                  </div>
+                  <span id="demo1-icon" class="text-3xl font-bold" style="color: #1e3a8a;">+</span>
+                </div>
+                <p class="text-lg" style="color: #1e40af;">Rango etario predominante</p>
+                
+                <div id="demo1-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="p-5 rounded-xl mb-4" style="background: white;">
+                    <div class="text-center mb-4">
+                      <div class="text-5xl mb-3">👨‍🦱👩‍🦰</div>
+                      <p class="text-4xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">20-45</p>
+                      <p class="font-bold text-lg">años</p>
+                    </div>
+                    <p class="text-base text-center mb-3">Rango de edad principal de los visitantes</p>
+                  </div>
+
+                  <div class="p-4 rounded-xl" style="background: white;">
+                    <p class="font-bold mb-2 text-center" style="color: #1e3a8a;">⚠️ Consideración Importante</p>
+                    <p class="text-sm text-center">Los adultos mayores son <strong>excepciones</strong> debido al riesgo que implica el terreno irregular y las caminatas exigentes</p>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3 mt-4">
+                    <div class="p-3 rounded-lg text-center" style="background: #dbeafe;">
+                      <p class="text-3xl mb-1">💪</p>
+                      <p class="text-sm font-bold">Condición Física</p>
+                      <p class="text-xs">Moderada a Buena</p>
+                    </div>
+                    <div class="p-3 rounded-lg text-center" style="background: #dbeafe;">
+                      <p class="text-3xl mb-1">🏃</p>
+                      <p class="text-sm font-bold">Actividad</p>
+                      <p class="text-xs">Perfil Activo</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); cursor: pointer;" onclick="toggleDetail('demo2')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">💰</div>
+                    <h4 class="text-2xl font-bold" style="color: #831843;">Nivel Socioeconómico</h4>
+                  </div>
+                  <span id="demo2-icon" class="text-3xl font-bold" style="color: #831843;">+</span>
+                </div>
+                <p class="text-lg" style="color: #9f1239;">Poder adquisitivo del visitante</p>
+                
+                <div id="demo2-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="text-center mb-3">
+                        <div class="text-5xl mb-2">📊</div>
+                        <p class="text-2xl font-black" style="color: ${config.primary_action || defaultConfig.primary_action};">Medio y Medio Alto</p>
+                      </div>
+                      <p class="text-base text-center">Segmento socioeconómico predominante</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <p class="font-bold mb-3 text-center" style="color: #831843;">💵 Características del Gasto</p>
+                      <div class="space-y-2 text-sm">
+                        <p>• Dispuestos a invertir en experiencias de calidad</p>
+                        <p>• Valoran servicios guiados profesionales</p>
+                        <p>• Consumen productos locales artesanales</p>
+                        <p>• Invierten en equipo de fotografía y outdoor</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <p class="font-bold mb-2 text-center" style="color: #831843;">🎯 Capacidad de Inversión</p>
+                      <p class="text-sm text-center">Pueden costear tours completos, equipo especializado y estadías prolongadas</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); cursor: pointer;" onclick="toggleDetail('demo3')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">💼</div>
+                    <h4 class="text-2xl font-bold" style="color: #7c2d12;">Ocupación</h4>
+                  </div>
+                  <span id="demo3-icon" class="text-3xl font-bold" style="color: #7c2d12;">+</span>
+                </div>
+                <p class="text-lg" style="color: #92400e;">Perfiles profesionales diversos</p>
+                
+                <div id="demo3-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🎓</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Jóvenes Estudiantes</p>
+                      </div>
+                      <p class="text-base">Universitarios y estudiantes de posgrado interesados en biología, ecología y ciencias ambientales</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🌿</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Ecoturistas</p>
+                      </div>
+                      <p class="text-base">Viajeros conscientes que buscan turismo sostenible y experiencias de conservación</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">👨‍👩‍👧‍👦</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Familias</p>
+                      </div>
+                      <p class="text-base">Familias con hijos adolescentes o adultos jóvenes que buscan actividades educativas en la naturaleza</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">    </div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Viajeros Independientes</p>
+                      </div>
+                      <p class="text-base">Aventureros que organizan sus propios itinerarios y buscan experiencias auténticas fuera de lo convencional</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🧠 Segmentación Psicográfica</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); cursor: pointer;" onclick="toggleDetail('psico1')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">💡</div>
+                    <h4 class="text-2xl font-bold" style="color: #312e81;">Motivaciones</h4>
+                  </div>
+                  <span id="psico1-icon" class="text-3xl font-bold" style="color: #312e81;">+</span>
+                </div>
+                <p class="text-lg" style="color: #3730a3;">Qué los impulsa a visitar</p>
+                
+                <div id="psico1-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="text-center mb-3">
+                        <div class="text-5xl mb-2">✨</div>
+                        <p class="font-bold text-lg mb-2" style="color: #312e81;">Experiencias Auténticas</p>
+                      </div>
+                      <p class="text-base">Búsqueda de vivencias genuinas, lejos del turismo masivo y comercializado</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="text-center mb-3">
+                        <div class="text-5xl mb-2">🌳</div>
+                        <p class="font-bold text-lg mb-2" style="color: #312e81;">Contacto con la Naturaleza</p>
+                      </div>
+                      <p class="text-base">Deseo profundo de reconectar con el medio ambiente y desconectar de la vida urbana</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="text-center mb-3">
+                        <div class="text-5xl mb-2">🧘</div>
+                        <p class="font-bold text-lg mb-2" style="color: #312e81;">Bienestar Físico y Mental</p>
+                      </div>
+                      <p class="text-base">Búsqueda de equilibrio, reducción de estrés y mejora de la salud integral</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); cursor: pointer;" onclick="toggleDetail('psico2')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">🌟</div>
+                    <h4 class="text-2xl font-bold" style="color: #064e3b;">Estilo de Vida</h4>
+                  </div>
+                  <span id="psico2-icon" class="text-3xl font-bold" style="color: #064e3b;">+</span>
+                </div>
+                <p class="text-lg" style="color: #065f46;">Características del día a día</p>
+                
+                <div id="psico2-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🏃</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Activo</p>
+                      </div>
+                      <p class="text-base">Practican deportes al aire libre, senderismo, ciclismo y otras actividades físicas regularmente</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">♻️</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Consciente del Medio Ambiente</p>
+                      </div>
+                      <p class="text-base">Practican reciclaje, reducción de plásticos y consumo responsable en su vida diaria</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🌱</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Interés en Sostenibilidad</p>
+                      </div>
+                      <p class="text-base">Informados sobre cambio climático, conservación y apoyan iniciativas verdes</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📸</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Pasión por la Fotografía</p>
+                      </div>
+                      <p class="text-base">Documentan sus experiencias y comparten en redes sociales de forma responsable</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); cursor: pointer;" onclick="toggleDetail('psico3')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">💚</div>
+                    <h4 class="text-2xl font-bold" style="color: #78350f;">Valores</h4>
+                  </div>
+                  <span id="psico3-icon" class="text-3xl font-bold" style="color: #78350f;">+</span>
+                </div>
+                <p class="text-lg" style="color: #92400e;">Principios que los guían</p>
+                
+                <div id="psico3-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🌿</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Respeto por la Naturaleza</p>
+                      </div>
+                      <p class="text-base">Profundo compromiso con la preservación del medio ambiente y los ecosistemas</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🏔️</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Aventura</p>
+                      </div>
+                      <p class="text-base">Espíritu explorador y disposición para salir de la zona de confort</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">   </div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Aprendizaje</p>
+                      </div>
+                      <p class="text-base">Curiosidad por conocer sobre biodiversidad, conservación y culturas locales</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">❤️</div>
+                        <p class="font-bold text-lg" style="color: #78350f;">Conexión Emocional</p>
+                      </div>
+                      <p class="text-base">Búsqueda de vínculos significativos con el entorno natural y las comunidades</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-center mb-6">
+              <div class="text-8xl mb-4">   </div>
+              <h3 class="text-4xl font-black mb-3">Producto Aumentado</h3>
+              <p class="text-2xl font-bold">Más allá del senderismo básico</p>
+            </div>
+
+            <div class="p-6 rounded-xl mb-6" style="background: rgba(255,255,255,0.15);">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="text-6xl">🥾</div>
+                <div>
+                  <p class="text-2xl font-bold mb-2">El Producto Básico: Caminar</p>
+                  <p class="text-lg opacity-90">Transformado en una experiencia integral inolvidable</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.95); color: #1f2937;">
+                <div class="text-6xl text-center mb-4">✨</div>
+                <h4 class="text-2xl font-bold mb-4 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">Experiencia Diferenciada</h4>
+                <div class="space-y-3">
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">🧘 Senderismo + Meditación</p>
+                    <p class="text-sm">Combina actividad física con momentos de introspección en entornos naturales</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">☕ Degustación de Café Local</p>
+                    <p class="text-sm">Prueba el café producido sosteniblemente en el propio parque</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">🌄 Experiencia Holística</p>
+                    <p class="text-sm">Todos los sentidos involucrados: vista, oído, olfato, gusto y tacto</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.95); color: #1f2937;">
+                <div class="text-6xl text-center mb-4">💚</div>
+                <h4 class="text-2xl font-bold mb-4 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">Beneficios Transformadores</h4>
+                <div class="space-y-3">
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">🌬️ Escape de la Rutina</p>
+                    <p class="text-sm">Salir del día a día urbano y disfrutar de aire puro sin contaminación</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">💪 Vida Más Sana</p>
+                    <p class="text-sm">Generar resistencia física y acostumbrar el cuerpo a hábitos saludables</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: ${config.background_color || defaultConfig.background_color};">
+                    <p class="font-bold mb-1">📸 Espacios Fotográficos</p>
+                    <p class="text-sm">Lugares increíbles donde capturar las mejores fotografías para tus recuerdos</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl" style="background: rgba(0,0,0,0.3);">
+              <div class="flex items-start gap-4 mb-4">
+                <div class="text-6xl">🎯</div>
+                <div>
+                  <h4 class="text-2xl font-bold mb-3">Objetivo de la Experiencia</h4>
+                  <p class="text-lg leading-relaxed mb-4">
+                    Generar una <strong>experiencia emocional, educativa y sostenible</strong> que los visitantes querrán compartir en redes sociales de forma responsable.
+                  </p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-4 rounded-lg text-center" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-5xl mb-3">❤️</div>
+                  <p class="font-bold text-xl mb-2">Emocional</p>
+                  <p class="text-sm opacity-90">Conexión profunda con la naturaleza</p>
+                </div>
+                <div class="p-4 rounded-lg text-center" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-5xl mb-3">🎓</div>
+                  <p class="font-bold text-xl mb-2">Educativa</p>
+                  <p class="text-sm opacity-90">Aprendizaje sobre conservación</p>
+                </div>
+                <div class="p-4 rounded-lg text-center" style="background: rgba(255,255,255,0.15);">
+                  <div class="text-5xl mb-3">♻️</div>
+                  <p class="font-bold text-xl mb-2">Sostenible</p>
+                  <p class="text-sm opacity-90">Turismo responsable con el ambiente</p>
+                </div>
+              </div>
+
+              <div class="mt-6 p-4 rounded-lg" style="background: rgba(255,255,255,0.2);">
+                <p class="text-center text-lg">
+                  <strong>📱 Promoción Responsable:</strong> Incentivamos compartir en redes sociales, pero siempre educando sobre el cuidado de la naturaleza y animando a otros a disfrutarla de manera sostenible.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCampanaPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white; position: relative; overflow: hidden;">
+            <div style="position: relative; z-index: 1;">
+              <div class="text-8xl mb-4">  ️</div>
+              <h2 class="text-5xl font-black mb-4">Protejamos Nuestro Merendón</h2>
+              <p class="text-2xl font-bold mb-3">Campaña de Conservación y Ecoturismo Responsable 2024</p>
+              <p class="text-xl opacity-95">Juntos por la biodiversidad del Parque Nacional El Cusuco</p>
+              
+              <div class="mt-6 inline-block px-8 py-4 rounded-full" style="background: rgba(255,255,255,0.2); border: 3px solid white;">
+                <p class="text-2xl font-black">#ProtejamosElMerendón</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+            <div class="text-center mb-6">
+              <div class="text-center mb-4" style="padding: 2rem;">
+                <img src="https://www.dropbox.com/scl/fi/njwz6enhkgn6bf26qi4pz/Dise-o_sin_t-tulo_V2.gif?rlkey=4w45c9c9dpi4i1j7jvi08geu8&st=hbsihhfv&raw=1" 
+                     alt="Cusquito - Mascota Oficial del Parque Nacional El Cusuco" 
+                     style="width: 300px; height: 300px; margin: 0 auto; display: block; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; font-size: 120px;">🦝</div>
+              </div>
+              <h3 class="text-4xl font-black mb-3" style="color: #78350f;">¡Conoce a Cusquito!</h3>
+              <p class="text-2xl font-bold mb-2" style="color: #92400e;">El Guardabosques Oficial del Merendón</p>
+              <p class="text-xl" style="color: #92400e;">Nuestro amigo cusuco te enseña a proteger el bosque 🌳</p>
+            </div>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+            <div class="text-center mb-6">
+              <div class="text-6xl mb-4">🎯</div>
+              <h3 class="text-3xl font-black mb-3" style="color: #312e81;">Objetivo de la Campaña</h3>
+              <p class="text-xl leading-relaxed" style="color: #3730a3;">
+                <strong>Promover la conservación del Parque Nacional El Cusuco</strong> mediante la educación ambiental y la participación activa de los visitantes en acciones concretas de protección.
+              </p>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">📱 Estrategias de Marketing</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); cursor: pointer;" onclick="toggleDetail('estrategia1')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">📱</div>
+                    <h4 class="text-2xl font-bold" style="color: #1e3a8a;">Campaña Digital</h4>
+                  </div>
+                  <span id="estrategia1-icon" class="text-3xl font-bold" style="color: #1e3a8a;">+</span>
+                </div>
+                <p class="text-lg" style="color: #1e40af;">Presencia masiva en redes sociales</p>
+                
+                <div id="estrategia1-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📸</div>
+                        <p class="font-bold text-lg" style="color: #1e3a8a;">Instagram & TikTok</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Contenido visual impactante:</strong> Fotos y videos de la belleza del parque</p>
+                        <p>✓ <strong>Reels educativos:</strong> Tips de conservación con Cusquito como protagonista</p>
+                        <p>✓ <strong>Stories interactivas:</strong> Encuestas, quizzes sobre biodiversidad</p>
+                        <p>✓ <strong>User Generated Content:</strong> Repostear fotos de visitantes con #ProtejamosElMerendón</p>
+                        <p>✓ <strong>Challenges virales:</strong> #CusquitoChallenge (acciones de conservación)</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📘</div>
+                        <p class="font-bold text-lg" style="color: #1e3a8a;">Facebook</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Eventos virtuales:</strong> Lives con guías y expertos ambientales</p>
+                        <p>✓ <strong>Grupos comunitarios:</strong> "Amigos del Cusuco" para organizar visitas</p>
+                        <p>✓ <strong>Campañas de concientización:</strong> Posts sobre tala ilegal e incendios</p>
+                        <p>✓ <strong>Testimonios:</strong> Historias de visitantes y comunidades locales</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🌐</div>
+                        <p class="font-bold text-lg" style="color: #1e3a8a;">Website & Email Marketing</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Blog educativo:</strong> Artículos sobre especies y conservación</p>
+                        <p>✓ <strong>Newsletter mensual:</strong> "Noticias desde el Merendón"</p>
+                        <p>✓ <strong>Sistema de reservas online:</strong> Para tours y actividades</p>
+                        <p>✓ <strong>Programa de embajadores:</strong> Registro de voluntarios digitales</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: #dbeafe;">
+                      <p class="font-bold mb-2" style="color: #1e3a8a;">🎯 KPIs Digitales:</p>
+                      <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>• 50K seguidores (6 meses)</div>
+                        <div>• 5M impresiones/mes</div>
+                        <div>• 100K uso de hashtag</div>
+                        <div>• 10% engagement rate</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); cursor: pointer;" onclick="toggleDetail('estrategia2')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">📺</div>
+                    <h4 class="text-2xl font-bold" style="color: #7c2d12;">Medios Tradicionales</h4>
+                  </div>
+                  <span id="estrategia2-icon" class="text-3xl font-bold" style="color: #7c2d12;">+</span>
+                </div>
+                <p class="text-lg" style="color: #92400e;">Radio, TV y prensa escrita</p>
+                
+                <div id="estrategia2-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📻</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Radio</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Spots de 30 segundos:</strong> "Cusquito te invita a proteger el Merendón"</p>
+                        <p>✓ <strong>Entrevistas en programas matutinos:</strong> Guías y biólogos del parque</p>
+                        <p>✓ <strong>Programas especiales:</strong> "Voces del Bosque" (semanal)</p>
+                        <p>✓ <strong>Alianzas con radios locales:</strong> En San Pedro Sula y Cofradía</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📺</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Televisión</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Comerciales de 60 seg:</strong> Belleza del parque y llamado a la acción</p>
+                        <p>✓ <strong>Reportajes especiales:</strong> En noticieros locales y nacionales</p>
+                        <p>✓ <strong>Mini documentales:</strong> "Guardianes del Merendón" (series de 5 capítulos)</p>
+                        <p>✓ <strong>Programas educativos infantiles:</strong> Aventuras de Cusquito (animado)</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📰</div>
+                        <p class="font-bold text-lg" style="color: #7c2d12;">Prensa Escrita</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Publirreportajes:</strong> En periódicos nacionales (La Prensa, El Heraldo)</p>
+                        <p>✓ <strong>Columnas de opinión:</strong> Expertos ambientales sobre conservación</p>
+                        <p>✓ <strong>Suplementos especiales:</strong> "Ecoturismo en Honduras"</p>
+                        <p>✓ <strong>Revistas de viajes:</strong> Artículos en publicaciones turísticas</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: #fed7aa;">
+                      <p class="font-bold mb-2" style="color: #7c2d12;">🎬 Producción de Contenido:</p>
+                      <div class="space-y-1 text-sm">
+                        <p>• Video institucional profesional (3-5 min)</p>
+                        <p>• Serie de micro-documentales</p>
+                        <p>• Banco de imágenes de alta calidad</p>
+                        <p>• Jingles pegajosos con mensaje de conservación</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-card card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); cursor: pointer;" onclick="toggleDetail('estrategia3')">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-4">
+                    <div class="text-6xl">🏪</div>
+                    <h4 class="text-2xl font-bold" style="color: #064e3b;">Medios Físicos</h4>
+                  </div>
+                  <span id="estrategia3-icon" class="text-3xl font-bold" style="color: #064e3b;">+</span>
+                </div>
+                <p class="text-lg" style="color: #065f46;">Presencia en la ciudad y comunidades</p>
+                
+                <div id="estrategia3-detail" style="display: none; margin-top: 1.5rem;">
+                  <div class="space-y-4">
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🪧</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Vallas Publicitarias</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Ubicaciones estratégicas:</strong> Carreteras hacia el parque</p>
+                        <p>    <strong>Puntos urbanos clave:</strong> San Pedro Sula y Choloma</p>
+                        <p>✓ <strong>Mensajes rotativos:</strong> Belleza del parque / llamados de conservación</p>
+                        <p>✓ <strong>Diseño llamativo:</strong> Cusquito como imagen principal</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">📋</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Material Impreso</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Flyers y brochures:</strong> En hoteles, restaurantes y agencias de viaje</p>
+                        <p>✓ <strong>Pósters educativos:</strong> En escuelas y universidades</p>
+                        <p>✓ <strong>Mapas ilustrados:</strong> Del parque con rutas y puntos de interés</p>
+                        <p>✓ <strong>Stickers de Cusquito:</strong> Para regalar a visitantes</p>
+                        <p>✓ <strong>Guía del ecoturista responsable:</strong> Folleto con reglas del parque</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🏬</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Puntos de Distribución</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Centros comerciales:</strong> Stands informativos los fines de semana</p>
+                        <p>✓ <strong>Cafeterías aliadas:</strong> Material en establecimientos que venden café del Cusuco</p>
+                        <p>✓ <strong>Oficinas de turismo:</strong> En aeropuerto y terminales de buses</p>
+                        <p>✓ <strong>Tiendas outdoor:</strong> Equipo de montaña y camping</p>
+                      </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl" style="background: white;">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="text-4xl">🎪</div>
+                        <p class="font-bold text-lg" style="color: #064e3b;">Activaciones de Marca</p>
+                      </div>
+                      <div class="space-y-2 text-base">
+                        <p>✓ <strong>Ferias ambientales:</strong> Stand de "Protejamos el Merendón"</p>
+                        <p>✓ <strong>Eventos deportivos:</strong> Patrocinio de carreras de montaña</p>
+                        <p>✓ <strong>Festivales culturales:</strong> Presencia con mascota de Cusquito</p>
+                        <p>✓ <strong>Días especiales:</strong> Día del Medio Ambiente, Día del Árbol</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-center mb-6">
+              <div class="text-7xl mb-4">🏞️</div>
+              <h3 class="text-3xl font-black mb-3">Activaciones en el Parque</h3>
+              <p class="text-xl">Experiencia directa de la campaña durante tu visita</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-5xl">🎓</div>
+                  <h4 class="text-2xl font-bold">Charlas de Concientización</h4>
+                </div>
+                <div class="space-y-3 text-lg">
+                  <p>✓ <strong>Charlas pre-caminata:</strong> 15 minutos antes de cada tour</p>
+                  <p>✓ <strong>Temas clave:</strong> Biodiversidad, conservación, turismo responsable</p>
+                  <p>✓ <strong>Guías capacitados:</strong> Formación continua en educación ambiental</p>
+                  <p>✓ <strong>Material didáctico:</strong> Láminas ilustrativas con especies del parque</p>
+                  <p>✓ <strong>Mensajes de Cusquito:</strong> Mascota como portavoz de las reglas</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-5xl">🪧</div>
+                  <h4 class="text-2xl font-bold">Señalización Educativa</h4>
+                </div>
+                <div class="space-y-3 text-lg">
+                  <p>✓ <strong>Señales interpretativas:</strong> En senderos principales</p>
+                  <p>✓ <strong>Letreros con Cusquito:</strong> Mensajes amigables de conservación</p>
+                  <p>✓ <strong>Códigos QR:</strong> Información ampliada en smartphones</p>
+                  <p>✓ <strong>Estaciones educativas:</strong> 5 puntos con información de especies</p>
+                  <p>✓ <strong>Señales de "No Dejar Rastro":</strong> Recordatorios visuales</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-5xl">📸</div>
+                  <h4 class="text-2xl font-bold">Puntos Fotográficos</h4>
+                </div>
+                <div class="space-y-3 text-lg">
+                  <p>✓ <strong>"Foto con Cusquito":</strong> Silueta de mascota en miradores</p>
+                  <p>✓ <strong>Marcos instagrameables:</strong> Con #ProtejamosElMerendón</p>
+                  <p>✓ <strong>Carteles de compromiso:</strong> "Yo protejo el Cusuco porque..."</p>
+                  <p>✓ <strong>Incentivo de compartir:</strong> Mejor foto del mes gana tour gratis</p>
+                </div>
+              </div>
+
+              <div class="p-6 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                <div class="flex items-center gap-4 mb-4">
+                  <div class="text-5xl">♻️</div>
+                  <h4 class="text-2xl font-bold">Estaciones Ecológicas</h4>
+                </div>
+                <div class="space-y-3 text-lg">
+                  <p>✓ <strong>Puntos de reciclaje:</strong> Contenedores diferenciados</p>
+                  <p>✓ <strong>Dispensadores de agua:</strong> Para rellenar botellas reutilizables</p>
+                  <p>✓ <strong>Información en tiempo real:</strong> Árboles plantados, residuos recolectados</p>
+                  <p>✓ <strong>Centro de visitantes mejorado:</strong> Exposición permanente</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-8">
+            <h3 class="text-3xl font-black mb-6 text-center" style="color: ${config.primary_action || defaultConfig.primary_action};">🤝 Alianzas Estratégicas Locales</h3>
+            
+            <div class="content-card mb-6" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="text-6xl">☕</div>
+                <div>
+                  <h4 class="text-2xl font-bold" style="color: #78350f;">Alianza con Productores de Café</h4>
+                  <p class="text-lg" style="color: #92400e;">Incentivos económicos para la conservación</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-5 rounded-xl" style="background: white;">
+                  <h5 class="text-xl font-bold mb-3" style="color: #78350f;">💰 Sistema de Descuentos</h5>
+                  <div class="space-y-2 text-base">
+                    <p>✓ <strong>20% descuento</strong> en café para participantes de reforestación</p>
+                    <p>✓ <strong>15% descuento</strong> en tours para voluntarios de limpieza</p>
+                    <p>✓ <strong>Paquete familiar</strong> con café premium por actividad ambiental</p>
+                    <p>✓ <strong>Tarjeta de fidelidad:</strong> Acumula acciones = beneficios</p>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl" style="background: white;">
+                  <h5 class="text-xl font-bold mb-3" style="color: #78350f;">🎁 Productos con Causa</h5>
+                  <div class="space-y-2 text-base">
+                    <p>✓ <strong>"Café Guardián":</strong> Edición especial, 5% va a reforestación</p>
+                    <p>✓ <strong>Merchandising oficial:</strong> Termos, bolsas, camisetas con Cusquito</p>
+                    <p>✓ <strong>Certificados de adopción:</strong> Adopta un árbol virtual</p>
+                    <p>✓ <strong>Tours + café:</strong> Paquetes integrados con degustación</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="text-6xl">🎓</div>
+                <div>
+                  <h4 class="text-2xl font-bold" style="color: #312e81;">Programa de Servicio Social Estudiantil</h4>
+                  <p class="text-lg" style="color: #3730a3;">Estudiantes como agentes de cambio</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-5 rounded-xl" style="background: white;">
+                  <div class="text-5xl text-center mb-3">🌱</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: #312e81;">Reforestación</h5>
+                  <div class="space-y-2 text-sm">
+                    <p>• Jornadas cada 2 sábados</p>
+                    <p>• Grupos de 20-30 estudiantes</p>
+                    <p>• 4 horas = créditos de servicio social</p>
+                    <p>• Incluye: transporte, herramientas, almuerzo</p>
+                    <p>• Certificado oficial validado</p>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl" style="background: white;">
+                  <div class="text-5xl text-center mb-3">♻️</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: #312e81;">Limpieza de Senderos</h5>
+                  <div class="space-y-2 text-sm">
+                    <p>• Actividades mensuales</p>
+                    <p>• Recolección responsable de residuos</p>
+                    <p>• 3 horas = créditos válidos</p>
+                    <p>• Aprenden sobre "No Dejar Rastro"</p>
+                    <p>• Reciben kit de voluntario</p>
+                  </div>
+                </div>
+
+                <div class="p-5 rounded-xl" style="background: white;">
+                  <div class="text-5xl text-center mb-3">👨‍🏫</div>
+                  <h5 class="text-xl font-bold text-center mb-3" style="color: #312e81;">Educadores Ambientales</h5>
+                  <div class="space-y-2 text-sm">
+                    <p>• Estudiantes capacitados como guías</p>
+                    <p>• Dar charlas en escuelas primarias</p>
+                    <p>• Crear contenido educativo</p>
+                    <p>• Liderar tours escolares</p>
+                    <p>   Máximo reconocimiento académico</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-6 p-5 rounded-xl" style="background: white;">
+                <p class="font-bold text-lg mb-3 text-center" style="color: #312e81;">🏫 Universidades y Colegios Aliados</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+                  <div class="p-3 rounded-lg" style="background: #e0e7ff;">
+                    <p class="font-bold">UNAH</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: #e0e7ff;">
+                    <p class="font-bold">UNICAH</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: #e0e7ff;">
+                    <p class="font-bold">UNITEC</p>
+                  </div>
+                  <div class="p-3 rounded-lg" style="background: #e0e7ff;">
+                    <p class="font-bold">Colegios Locales</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card mb-8" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+            <div class="text-center mb-6">
+              <div class="text-7xl mb-4">🎯</div>
+              <h3 class="text-3xl font-black mb-3" style="color: #831843;">Impacto Esperado</h3>
+              <p class="text-xl" style="color: #9f1239;">Resultados medibles de la campaña</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div class="p-6 rounded-xl text-center" style="background: white;">
+                <div class="text-6xl mb-4">♻️</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Residuos</h4>
+                <div class="text-4xl font-black mb-2" style="color: #831843;">-80%</div>
+                <p class="text-base">Reducción de basura en senderos</p>
+              </div>
+
+              <div class="p-6 rounded-xl text-center" style="background: white;">
+                <div class="text-6xl mb-4">🪓</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Tala Ilegal</h4>
+                <div class="text-4xl font-black mb-2" style="color: #831843;">-90%</div>
+                <p class="text-base">Reducción de incidentes de tala</p>
+              </div>
+
+              <div class="p-6 rounded-xl text-center" style="background: white;">
+                <div class="text-6xl mb-4">🌱</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Reforestación</h4>
+                <div class="text-4xl font-black mb-2" style="color: #831843;">+150%</div>
+                <p class="text-base">Aumento de árboles plantados</p>
+              </div>
+
+              <div class="p-6 rounded-xl text-center" style="background: white;">
+                <div class="text-6xl mb-4">💚</div>
+                <h4 class="text-2xl font-bold mb-3" style="color: ${config.primary_action || defaultConfig.primary_action};">Conciencia</h4>
+                <div class="text-4xl font-black mb-2" style="color: #831843;">10K+</div>
+                <p class="text-base">Visitantes educados anualmente</p>
+              </div>
+            </div>
+
+            <div class="mt-8 p-6 rounded-xl" style="background: white;">
+              <h4 class="text-2xl font-bold text-center mb-4" style="color: #831843;">🏆 Posicionamiento como Destino de Ecoturismo Responsable</h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="p-4">
+                  <div class="text-4xl mb-2">🌎</div>
+                  <p class="font-bold text-lg">Reconocimiento Internacional</p>
+                  <p class="text-sm">Certificación de turismo sostenible</p>
+                </div>
+                <div class="p-4">
+                  <div class="text-4xl mb-2">📈</div>
+                  <p class="font-bold text-lg">Aumento de Visitantes</p>
+                  <p class="text-sm">+40% turismo responsable</p>
+                </div>
+                <div class="p-4">
+                  <div class="text-4xl mb-2">💼</div>
+                  <p class="font-bold text-lg">Desarrollo Local</p>
+                  <p class="text-sm">Más empleos y economía verde</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="content-card text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white; position: relative; overflow: hidden;">
+            <div style="position: absolute; top: -20px; left: -20px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px);"></div>
+            <div style="position: absolute; bottom: -30px; right: -30px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(50px);"></div>
+            
+            <div style="position: relative; z-index: 1;">
+              <div style="margin: 0 auto 2rem; padding: 2rem; background: rgba(255,255,255,0.15); border-radius: 50%; width: fit-content; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+                <img src="https://www.dropbox.com/scl/fi/njwz6enhkgn6bf26qi4pz/Dise-o_sin_t-tulo_V2.gif?rlkey=4w45c9c9dpi4i1j7jvi08geu8&st=hbsihhfv&raw=1" 
+                     alt="Cusquito - Mascota Oficial del Parque Nacional El Cusuco" 
+                     style="width: 280px; height: 280px; display: block; object-fit: contain; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.4));"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <div style="display: none; font-size: 180px; line-height: 1;">🦝</div>
+              </div>
+              
+              <h3 class="text-5xl font-black mb-4" style="text-shadow: 0 4px 10px rgba(0,0,0,0.3);">¡Únete a Cusquito!</h3>
+              <p class="text-2xl font-bold mb-3">Tu Guardabosques Oficial del Merendón</p>
+              <p class="text-xl mb-8 opacity-95">Sé parte del movimiento de conservación y ecoturismo responsable</p>
+              
+              <div class="flex flex-wrap justify-center gap-4 text-xl mb-6">
+                <div class="px-8 py-4 rounded-full font-bold" style="background: rgba(255,255,255,0.25); box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.3);">
+                  📱 #ProtejamosElMerendón
+                </div>
+                <div class="px-8 py-4 rounded-full font-bold" style="background: rgba(255,255,255,0.25); box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.3);">
+                  🌳 #CusquitoGuardián
+                </div>
+                <div class="px-8 py-4 rounded-full font-bold" style="background: rgba(255,255,255,0.25); box-shadow: 0 8px 20px rgba(0,0,0,0.2); border: 2px solid rgba(255,255,255,0.3);">
+                  💚 #EcoturismoResponsable
+                </div>
+              </div>
+              
+              <div class="p-6 rounded-2xl" style="background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);">
+                <p class="text-2xl font-black mb-3">🌟 Cusquito te invita a:</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-lg">
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                    <p class="text-4xl mb-2">🌱</p>
+                    <p class="font-bold">Proteger el Bosque</p>
+                    <p class="text-sm mt-2 opacity-90">Únete a jornadas de reforestación</p>
+                  </div>
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                    <p class="text-4xl mb-2">📸</p>
+                    <p class="font-bold">Compartir Responsable</p>
+                    <p class="text-sm mt-2 opacity-90">Documenta tu visita con conciencia</p>
+                  </div>
+                  <div class="p-4 rounded-xl" style="background: rgba(255,255,255,0.15);">
+                    <p class="text-4xl mb-2">🎓</p>
+                    <p class="font-bold">Educar y Aprender</p>
+                    <p class="text-sm mt-2 opacity-90">Conviértete en embajador del parque</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInformePage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">   </span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">📊</div>
+            <h2 class="text-4xl font-black mb-3">Informe de Gestión 2023</h2>
+            <p class="text-xl">Resumen ejecutivo de resultados y operaciones</p>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+            <div class="content-card text-center stat-card">
+              <div class="text-5xl mb-3">👥</div>
+              <div class="text-3xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">12,450</div>
+              <p class="font-bold">Visitantes</p>
+              <p class="text-sm" style="color: ${config.primary_action || defaultConfig.primary_action};">+18%</p>
+            </div>
+
+            <div class="content-card text-center stat-card">
+              <div class="text-5xl mb-3">💰</div>
+              <div class="text-3xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">L. 15.2M</div>
+              <p class="font-bold">Derrama</p>
+              <p class="text-sm opacity-75">Económica</p>
+            </div>
+
+            <div class="content-card text-center stat-card">
+              <div class="text-5xl mb-3">🌳</div>
+              <div class="text-3xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">15,750</div>
+              <p class="font-bold">Árboles</p>
+              <p class="text-sm opacity-75">Plantados</p>
+            </div>
+
+            <div class="content-card text-center stat-card">
+              <div class="text-5xl mb-3">🎓</div>
+              <div class="text-3xl font-black mb-2" style="color: ${config.primary_action || defaultConfig.primary_action};">3,240</div>
+              <p class="font-bold">Estudiantes</p>
+              <p class="text-sm opacity-75">Capacitados</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="content-card">
+              <h3 class="text-2xl font-black mb-6" style="color: ${config.primary_action || defaultConfig.primary_action};">🦜 Biodiversidad</h3>
+              
+              <div class="space-y-4">
+                <div class="feature-box">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-lg">🦜 Quetzales</span>
+                    <span class="text-2xl font-black" style="color: #10b981;">↑ Estable</span>
+                  </div>
+                  <p class="text-sm">1,247 avistamientos (+14.5% vs 2022)</p>
+                </div>
+
+                <div class="feature-box">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-lg">🐆 Jaguar y Puma</span>
+                    <span class="text-2xl font-black" style="color: #10b981;">↑ Creciente</span>
+                  </div>
+                  <p class="text-sm">23 avistamientos de jaguar (+21%)</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="content-card">
+              <h3 class="text-2xl font-black mb-6" style="color: ${config.primary_action || defaultConfig.primary_action};">🛡️ Amenazas Controladas</h3>
+              
+              <div class="space-y-4">
+                <div class="feature-box">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-lg">🔥 Incendios</span>
+                    <span class="text-2xl font-black" style="color: #10b981;">↓ -45%</span>
+                  </div>
+                  <p class="text-sm">Solo 3 incendios menores (12 ha afectadas)</p>
+                </div>
+
+                <div class="feature-box">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="font-bold text-lg">   Tala Ilegal</span>
+                    <span class="text-2xl font-black" style="color: #10b981;">↓ -67%</span>
+                  </div>
+                  <p class="text-sm">4 incidentes detectados y detenidos</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGaleriaPage() {
+      return `
+        <div class="p-8 page-transition" style="max-width: 1400px; margin: 0 auto;">
+          <div class="back-button" onclick="navigateTo('home')" style="background: ${config.secondary_action || defaultConfig.secondary_action}; color: white;">
+            <span style="font-size: 1.5rem;">←</span>
+            <span>Volver al Inicio</span>
+          </div>
+
+          <div class="content-card mb-8 text-center" style="background: linear-gradient(135deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+            <div class="text-7xl mb-4">📸</div>
+            <h2 class="text-4xl font-black mb-3">Galería Multimedia</h2>
+            <p class="text-xl">Descubre la belleza del bosque nuboso</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+              <svg width="100%" height="200" viewBox="0 0 200 200" class="mb-4 rounded-xl" style="box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                <defs>
+                  <linearGradient id="forest1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2d5a3d;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1a3d2d;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+                <rect width="200" height="200" fill="url(#forest1)" rx="10"/>
+                <circle cx="180" cy="30" r="20" fill="#ffd700" opacity="0.6"/>
+                <path d="M 20 120 Q 50 90 80 120 Q 110 90 140 120 Q 170 90 200 120 L 200 200 L 20 200 Z" fill="#3d6a4d"/>
+                <circle cx="60" cy="50" r="8" fill="#e0e0e0" opacity="0.7"/>
+                <circle cx="100" cy="55" r="10" fill="#e0e0e0" opacity="0.7"/>
+              </svg>
+              <h3 class="text-2xl font-bold mb-3" style="color: #064e3b;">Bosque Nuboso</h3>
+              <p style="color: #065f46;">Paisajes envueltos en niebla</p>
+            </div>
+
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+              <div class="text-9xl mb-4">🦜</div>
+              <h3 class="text-2xl font-bold mb-3" style="color: #78350f;">Quetzal Mesoamericano</h3>
+              <p style="color: #92400e;">Ave emblem  tica</p>
+            </div>
+
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);">
+              <div class="text-9xl mb-4">🐆</div>
+              <h3 class="text-2xl font-bold mb-3" style="color: #7c2d12;">Jaguar</h3>
+              <p style="color: #92400e;">Depredador del ecosistema</p>
+            </div>
+
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+              <div class="text-9xl mb-4">🐸</div>
+              <h3 class="text-2xl font-bold mb-3" style="color: #064e3b;">Salamandras</h3>
+              <p style="color: #065f46;">Especies endémicas</p>
+            </div>
+
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);">
+              <div class="text-9xl mb-4">🌺</div>
+              <h3 class="text-2xl font-bold mb-3" style="color: #831843;">Orqu  deas</h3>
+              <p style="color: #9f1239;">Más de 30 especies</p>
+            </div>
+
+            <div class="content-card text-center card-hover" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+              <div class="text-9xl mb-4">⛰️</div>
+              <h3 class="text-2xl font-bold mb-3" style="color: #1e3a8a;">Cerro Jilinco</h3>
+              <p style="color: #1e40af;">2,242 msnm</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderApp() {
+      const app = document.getElementById('app');
+      const baseFontSize = config.font_size || defaultConfig.font_size;
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Arial, sans-serif';
+
+      app.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      app.style.fontSize = `${baseFontSize}px`;
+      app.style.color = config.text_color || defaultConfig.text_color;
+      app.style.backgroundColor = config.background_color || defaultConfig.background_color;
+
+      const mainTitle = config.main_title || defaultConfig.main_title;
+
+      let pageContent = '';
+      
+      if (currentPage === 'home') {
+        pageContent = renderHomePage();
+      } else if (currentPage === 'historia') {
+        pageContent = renderHistoriaPage();
+      } else if (currentPage === 'actividades') {
+        pageContent = renderActividadesPage();
+      } else if (currentPage === 'mapa') {
+        pageContent = renderMapaPage();
+      } else if (currentPage === 'observaciones') {
+        pageContent = renderObservacionesPage();
+      } else if (currentPage === 'perfil') {
+        pageContent = renderPerfilPage();
+      } else if (currentPage === 'campana') {
+        pageContent = renderCampanaPage();
+      } else if (currentPage === 'informe') {
+        pageContent = renderInformePage();
+      } else if (currentPage === 'galeria') {
+        pageContent = renderGaleriaPage();
+      }
+
+      app.innerHTML = `
+        <div class="sidebar-overlay ${sidebarOpen ? 'show' : ''}" onclick="toggleSidebar()"></div>
+        
+        <div class="menu-button" onclick="toggleSidebar()" style="background: ${config.primary_action || defaultConfig.primary_action};">
+          ☰
+        </div>
+
+        <div class="sidebar ${sidebarOpen ? 'open' : ''}" style="background: linear-gradient(180deg, ${config.primary_action || defaultConfig.primary_action} 0%, ${config.secondary_action || defaultConfig.secondary_action} 100%); color: white;">
+          <div class="p-8" style="background: rgba(0,0,0,0.2);">
+            <div class="text-5xl mb-3 text-center">🌲</div>
+            <h1 class="text-2xl font-black mb-2 text-center">${mainTitle}</h1>
+          </div>
+          
+          <nav class="p-4">
+            <div class="nav-item p-4 mb-3 rounded-xl ${currentPage === 'home' ? 'active' : ''}" 
+                 onclick="navigateTo('home')"
+                 style="border-left-color: white; font-size: ${baseFontSize * 1.1}px;">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🏠</span>
+                <span class="font-bold">Inicio</span>
+              </div>
+            </div>
+            ${Object.entries(pages).filter(([key]) => key !== 'home').map(([key, page]) => `
+              <div class="nav-item p-4 mb-3 rounded-xl ${key === currentPage ? 'active' : ''}" 
+                   onclick="navigateTo('${key}')"
+                   style="border-left-color: white; font-size: ${baseFontSize * 1.1}px;">
+                <div class="flex items-center gap-3">
+                  <span class="text-3xl">${page.icon}</span>
+                  <span class="font-bold">${config['nav_' + key] || defaultConfig['nav_' + key]}</span>
+                </div>
+              </div>
+            `).join('')}
+          </nav>
+        </div>
+
+        <main class="main-content" style="background: ${config.background_color || defaultConfig.background_color};">
+          ${pageContent}
+        </main>
+      `;
+    }
+
+    function navigateTo(page) {
+      currentPage = page;
+      sidebarOpen = false;
+      renderApp();
+      window.scrollTo(0, 0);
+    }
+
+    function toggleSidebar() {
+      sidebarOpen = !sidebarOpen;
+      renderApp();
+    }
+
+    function showMapInfo(location) {
+      const infoPanel = document.getElementById('map-info');
+      const infoTitle = document.getElementById('map-info-title');
+      const infoDescription = document.getElementById('map-info-description');
+      
+      const locations = {
+        jilinco: {
+          title: '⛰️ Cerro Jilinco - Punto Más Alto',
+          description: 'Con 2,242 metros sobre el nivel del mar, el Cerro Jilinco es el punto más alto del parque. El ascenso toma 6-8 horas y ofrece vistas panorámicas espectaculares del Valle de Sula y la costa atlántica. Es una ruta avanzada que requiere guía local.'
+        },
+        quetzales: {
+          title: '🦜 Sendero Los Quetzales',
+          description: 'Sendero interpretativo de dificultad moderada (3-4 horas) diseñado específicamente para la observación del quetzal mesoamericano. La mejor época es de febrero a mayo. Ideal para aviturismo y fotografía de naturaleza.'
+        },
+        cascada: {
+          title: '💧 Cascadas',
+          description: 'Hermosas cascadas que generan sensación de paz y tranquilidad. Destino perfecto para contemplar y fotografiar. Incluye la Cascada Quetzal (1 hora) y la Cascada del Tucán (90 minutos). Las aguas cristalinas hacen de este uno de los puntos más visitados del parque.'
+        },
+        hortensias: {
+          title: '     Campo de Hortensias',
+          description: 'Espectacular campo de hortensias que ofrece vistas panorámicas y genera una sensación de paz y tranquilidad. Uno de los lugares más fotografiados del parque. Perfecto para relajarse y disfrutar de la belleza natural. Un tesoro escondido del bosque nuboso.'
+        },
+        centro: {
+          title: '🏛️ Centro de Visitantes',
+          description: 'Punto de entrada principal al parque donde te reciben de manera muy amigable. Aquí se registran los visitantes, se pagan las tarifas y se asignan guías locales que conocen a profundidad el parque. La comunidad local es muy servicial y trabajadora. Horario: 8:00 AM - 4:00 PM.'
+        },
+        camping: {
+          title: '🏕️ Área de Camping',
+          description: 'Zona designada para acampar con capacidad para 30 personas. Cuenta con plataformas para carpas y letrinas ecológicas. Recuerda llevar tu basura de regreso para mantener el parque limpio. Perfecto para pasar la noche bajo las estrellas en el bosque nuboso.'
+        }
+      };
+      
+      if (locations[location]) {
+        infoTitle.textContent = locations[location].title;
+        infoDescription.textContent = locations[location].description;
+        infoPanel.style.display = 'block';
+        infoPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function toggleDetail(id) {
+      const detail = document.getElementById(`${id}-detail`);
+      const icon = document.getElementById(`${id}-icon`);
+      
+      if (detail.style.display === 'none') {
+        detail.style.display = 'block';
+        icon.textContent = '−';
+      } else {
+        detail.style.display = 'none';
+        icon.textContent = '+';
+      }
+    }
+
+    window.navigateTo = navigateTo;
+    window.toggleSidebar = toggleSidebar;
+    window.showMapInfo = showMapInfo;
+    window.toggleDetail = toggleDetail;
+
+    async function onConfigChange(newConfig) {
+      config = newConfig;
+      renderApp();
+    }
+
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [
+          {
+            get: () => cfg.background_color || defaultConfig.background_color,
+            set: (value) => {
+              cfg.background_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => cfg.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              cfg.surface_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => cfg.text_color || defaultConfig.text_color,
+            set: (value) => {
+              cfg.text_color = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => cfg.primary_action || defaultConfig.primary_action,
+            set: (value) => {
+              cfg.primary_action = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ primary_action: value });
+            }
+          },
+          {
+            get: () => cfg.secondary_action || defaultConfig.secondary_action,
+            set: (value) => {
+              cfg.secondary_action = value;
+              if (window.elementSdk) window.elementSdk.setConfig({ secondary_action: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => cfg.font_family || defaultConfig.font_family,
+          set: (value) => {
+            cfg.font_family = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_family: value });
+          }
+        },
+        fontSizeable: {
+          get: () => cfg.font_size || defaultConfig.font_size,
+          set: (value) => {
+            cfg.font_size = value;
+            if (window.elementSdk) window.elementSdk.setConfig({ font_size: value });
+          }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ["main_title", cfg.main_title || defaultConfig.main_title],
+        ["subtitle", cfg.subtitle || defaultConfig.subtitle],
+        ["nav_historia", cfg.nav_historia || defaultConfig.nav_historia],
+        ["nav_actividades", cfg.nav_actividades || defaultConfig.nav_actividades],
+        ["nav_mapa", cfg.nav_mapa || defaultConfig.nav_mapa],
+        ["nav_observaciones", cfg.nav_observaciones || defaultConfig.nav_observaciones],
+        ["nav_perfil", cfg.nav_perfil || defaultConfig.nav_perfil],
+        ["nav_campana", cfg.nav_campana || defaultConfig.nav_campana],
+        ["nav_informe", cfg.nav_informe || defaultConfig.nav_informe],
+        ["nav_galeria", cfg.nav_galeria || defaultConfig.nav_galeria]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+      
+      if (window.elementSdk.config) {
+        config = window.elementSdk.config;
+      }
+    }
+
+    renderApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ada559a84e631c0',t:'MTc2NTY4MDAwNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
